@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{2C9C4DB0-F60B-4E55-8D57-458E68DF4909}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>ManajemenLaundrySepatu</RootNamespace>
+    <AssemblyName>ManajemenLaundrySepatu</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="FormHA.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormHA.Designer.cs">
+      <DependentUpon>FormHA.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormHB.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormHB.Designer.cs">
+      <DependentUpon>FormHB.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormHP.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormHP.Designer.cs">
+      <DependentUpon>FormHP.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormHS.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormHS.Designer.cs">
+      <DependentUpon>FormHS.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormHT.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormHT.Designer.cs">
+      <DependentUpon>FormHT.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormKDA.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormKDA.Designer.cs">
+      <DependentUpon>FormKDA.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormKDB.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormKDB.Designer.cs">
+      <DependentUpon>FormKDB.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormKDS.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormKDS.Designer.cs">
+      <DependentUpon>FormKDS.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormKDT.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormKDT.Designer.cs">
+      <DependentUpon>FormKDT.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormTB.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormTB.Designer.cs">
+      <DependentUpon>FormTB.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormTT.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormTT.Designer.cs">
+      <DependentUpon>FormTT.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormUA.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormUA.Designer.cs">
+      <DependentUpon>FormUA.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormTA.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormTA.Designer.cs">
+      <DependentUpon>FormTA.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormUB.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormUB.Designer.cs">
+      <DependentUpon>FormUB.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormUS.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormUS.Designer.cs">
+      <DependentUpon>FormUS.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormTP.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormTP.Designer.cs">
+      <DependentUpon>FormTP.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormTS.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormTS.Designer.cs">
+      <DependentUpon>FormTS.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormUP.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormUP.Designer.cs">
+      <DependentUpon>FormUP.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormUT.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormUT.Designer.cs">
+      <DependentUpon>FormUT.cs</DependentUpon>
+    </Compile>
+    <Compile Include="mainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="mainForm.Designer.cs">
+      <DependentUpon>mainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormLMS.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormLMS.Designer.cs">
+      <DependentUpon>FormLMS.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormKDP.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormKDP.Designer.cs">
+      <DependentUpon>FormKDP.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="FormHA.resx">
+      <DependentUpon>FormHA.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormHB.resx">
+      <DependentUpon>FormHB.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormHP.resx">
+      <DependentUpon>FormHP.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormHS.resx">
+      <DependentUpon>FormHS.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormHT.resx">
+      <DependentUpon>FormHT.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormKDA.resx">
+      <DependentUpon>FormKDA.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormKDB.resx">
+      <DependentUpon>FormKDB.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormKDS.resx">
+      <DependentUpon>FormKDS.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormKDT.resx">
+      <DependentUpon>FormKDT.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormTB.resx">
+      <DependentUpon>FormTB.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormTT.resx">
+      <DependentUpon>FormTT.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormUA.resx">
+      <DependentUpon>FormUA.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormTA.resx">
+      <DependentUpon>FormTA.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormUB.resx">
+      <DependentUpon>FormUB.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormUS.resx">
+      <DependentUpon>FormUS.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormTP.resx">
+      <DependentUpon>FormTP.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormTS.resx">
+      <DependentUpon>FormTS.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormUP.resx">
+      <DependentUpon>FormUP.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormUT.resx">
+      <DependentUpon>FormUT.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="mainForm.resx">
+      <DependentUpon>mainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormLMS.resx">
+      <DependentUpon>FormLMS.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormKDP.resx">
+      <DependentUpon>FormKDP.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
