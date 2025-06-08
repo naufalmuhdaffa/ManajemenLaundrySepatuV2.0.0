@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="DataSetLT" targetNamespace="http://tempuri.org/DataSetLT.xsd" xmlns:mstns="http://tempuri.org/DataSetLT.xsd" xmlns="http://tempuri.org/DataSetLT.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified" elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
+      <DataSource DefaultConnectionIndex="0" FunctionsComponentName="QueriesTableAdapter" Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
+        <Connections>
+          <Connection AppSettingsObjectName="Settings" AppSettingsPropertyName="manajemenLaundrySepatuConnectionString" ConnectionStringObject="" IsAppSettingsProperty="true" Modifier="Assembly" Name="manajemenLaundrySepatuConnectionString (Settings)" ParameterPrefix="@" PropertyReference="ApplicationSettings.ManajemenLaundrySepatu.Properties.Settings.GlobalReference.Default.manajemenLaundrySepatuConnectionString" Provider="System.Data.SqlClient" />
+        </Connections>
+        <Tables>
+          <TableAdapter BaseClass="System.ComponentModel.Component" DataAccessorModifier="AutoLayout, AnsiClass, Class, Public" DataAccessorName="vw_TransaksiDetailTableAdapter" GeneratorDataComponentClassName="vw_TransaksiDetailTableAdapter" Name="vw_TransaksiDetail" UserDataComponentName="vw_TransaksiDetailTableAdapter">
+            <MainSource>
+              <DbSource ConnectionRef="manajemenLaundrySepatuConnectionString (Settings)" DbObjectName="manajemenLaundrySepatu.dbo.vw_TransaksiDetail" DbObjectType="View" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="false" GeneratorGetMethodName="GetData" GeneratorSourceName="Fill" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="true" UserGetMethodName="GetData" UserSourceName="Fill">
+                <SelectCommand>
+                  <DbCommand CommandType="Text" ModifiedByUser="true">
+                    <CommandText>SELECT id_transaksi, username, nama_pelanggan, merek_sepatu, tanggal_transaksi, total_harga, status_transaksi
+FROM   vw_TransaksiDetail</CommandText>
+                    <Parameters />
+                  </DbCommand>
+                </SelectCommand>
+              </DbSource>
+            </MainSource>
+            <Mappings>
+              <Mapping SourceColumn="id_transaksi" DataSetColumn="id_transaksi" />
+              <Mapping SourceColumn="username" DataSetColumn="username" />
+              <Mapping SourceColumn="nama_pelanggan" DataSetColumn="nama_pelanggan" />
+              <Mapping SourceColumn="merek_sepatu" DataSetColumn="merek_sepatu" />
+              <Mapping SourceColumn="tanggal_transaksi" DataSetColumn="tanggal_transaksi" />
+              <Mapping SourceColumn="total_harga" DataSetColumn="total_harga" />
+              <Mapping SourceColumn="status_transaksi" DataSetColumn="status_transaksi" />
+            </Mappings>
+            <Sources />
+          </TableAdapter>
+        </Tables>
+        <Sources />
+      </DataSource>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element name="DataSetLT" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:Generator_UserDSName="DataSetLT" msprop:EnableTableAdapterManager="true" msprop:Generator_DataSetName="DataSetLT">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="vw_TransaksiDetail" msprop:Generator_RowEvHandlerName="vw_TransaksiDetailRowChangeEventHandler" msprop:Generator_RowDeletedName="vw_TransaksiDetailRowDeleted" msprop:Generator_RowDeletingName="vw_TransaksiDetailRowDeleting" msprop:Generator_RowEvArgName="vw_TransaksiDetailRowChangeEvent" msprop:Generator_TablePropName="vw_TransaksiDetail" msprop:Generator_RowChangedName="vw_TransaksiDetailRowChanged" msprop:Generator_RowChangingName="vw_TransaksiDetailRowChanging" msprop:Generator_TableClassName="vw_TransaksiDetailDataTable" msprop:Generator_RowClassName="vw_TransaksiDetailRow" msprop:Generator_TableVarName="tablevw_TransaksiDetail" msprop:Generator_UserTableName="vw_TransaksiDetail">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="id_transaksi" msprop:Generator_ColumnPropNameInRow="id_transaksi" msprop:Generator_ColumnPropNameInTable="id_transaksiColumn" msprop:Generator_ColumnVarNameInTable="columnid_transaksi" msprop:Generator_UserColumnName="id_transaksi" type="xs:int" />
+              <xs:element name="username" msprop:Generator_ColumnPropNameInRow="username" msprop:Generator_ColumnPropNameInTable="usernameColumn" msprop:Generator_ColumnVarNameInTable="columnusername" msprop:Generator_UserColumnName="username">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="nama_pelanggan" msprop:Generator_ColumnPropNameInRow="nama_pelanggan" msprop:Generator_ColumnPropNameInTable="nama_pelangganColumn" msprop:Generator_ColumnVarNameInTable="columnnama_pelanggan" msprop:Generator_UserColumnName="nama_pelanggan">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="100" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="merek_sepatu" msprop:Generator_ColumnPropNameInRow="merek_sepatu" msprop:Generator_ColumnPropNameInTable="merek_sepatuColumn" msprop:Generator_ColumnVarNameInTable="columnmerek_sepatu" msprop:Generator_UserColumnName="merek_sepatu" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="100" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="tanggal_transaksi" msprop:Generator_ColumnPropNameInRow="tanggal_transaksi" msprop:Generator_ColumnPropNameInTable="tanggal_transaksiColumn" msprop:Generator_ColumnVarNameInTable="columntanggal_transaksi" msprop:Generator_UserColumnName="tanggal_transaksi" type="xs:dateTime" />
+              <xs:element name="total_harga" msprop:Generator_ColumnPropNameInRow="total_harga" msprop:Generator_ColumnPropNameInTable="total_hargaColumn" msprop:Generator_ColumnVarNameInTable="columntotal_harga" msprop:Generator_UserColumnName="total_harga" type="xs:decimal" />
+              <xs:element name="status_transaksi" msprop:Generator_ColumnPropNameInRow="status_transaksi" msprop:Generator_ColumnPropNameInTable="status_transaksiColumn" msprop:Generator_ColumnVarNameInTable="columnstatus_transaksi" msprop:Generator_UserColumnName="status_transaksi">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="10" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+    <xs:unique name="Constraint1" msdata:PrimaryKey="true">
+      <xs:selector xpath=".//mstns:vw_TransaksiDetail" />
+      <xs:field xpath="mstns:id_transaksi" />
+    </xs:unique>
+  </xs:element>
+</xs:schema>

@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35825.156 d17.13
+VisualStudioVersion = 17.13.35825.156
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManajemenLaundrySepatu", "ManajemenLaundrySepatu\ManajemenLaundrySepatu.csproj", "{2C9C4DB0-F60B-4E55-8D57-458E68DF4909}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManajemenLaundrySepatu.Tests", "ManajemenLaundrySepatu.Tests\ManajemenLaundrySepatu.Tests.csproj", "{BDA3AA31-1CA9-4603-913D-EE35B22B0C56}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{2C9C4DB0-F60B-4E55-8D57-458E68DF4909}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2C9C4DB0-F60B-4E55-8D57-458E68DF4909}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2C9C4DB0-F60B-4E55-8D57-458E68DF4909}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDA3AA31-1CA9-4603-913D-EE35B22B0C56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDA3AA31-1CA9-4603-913D-EE35B22B0C56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDA3AA31-1CA9-4603-913D-EE35B22B0C56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDA3AA31-1CA9-4603-913D-EE35B22B0C56}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
