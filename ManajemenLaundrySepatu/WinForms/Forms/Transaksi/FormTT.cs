@@ -224,26 +224,39 @@ namespace ManajemenLaundrySepatu
                 try
                 {
                     conn.Open();
-                    using (SqlCommand cmd = new SqlCommand("sp_CreateTransaksi", conn))
+                    using (SqlTransaction transaction = conn.BeginTransaction())
                     {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        cmd.Parameters.AddWithValue("@id_pelanggan", idPelanggan);
-                        cmd.Parameters.AddWithValue("@id_sepatu", idSepatu);
-                        cmd.Parameters.AddWithValue("@total_harga", totalHarga);
-                        cmd.Parameters.AddWithValue("@status_transaksi", status);
-                        cmd.Parameters.AddWithValue("@id_akun", idAkun);
-
-                        int rowsAffected = cmd.ExecuteNonQuery();
-                        if (rowsAffected > 0)
+                        try
                         {
-                            DarkModeMessageBox.Show("Transaksi berhasil ditambahkan!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            ClearForm();
-                            Cache.ClearCache($"Cache:Transaksi_{Session.LoggedInUserId}");
+                            using (SqlCommand cmd = new SqlCommand("sp_CreateTransaksi", conn, transaction))
+                            {
+                                cmd.CommandType = CommandType.StoredProcedure;
+
+                                cmd.Parameters.AddWithValue("@id_pelanggan", idPelanggan);
+                                cmd.Parameters.AddWithValue("@id_sepatu", idSepatu);
+                                cmd.Parameters.AddWithValue("@total_harga", totalHarga);
+                                cmd.Parameters.AddWithValue("@status_transaksi", status);
+                                cmd.Parameters.AddWithValue("@id_akun", idAkun);
+
+                                int rowsAffected = cmd.ExecuteNonQuery();
+                                if (rowsAffected > 0)
+                                {
+                                    transaction.Commit();
+                                    DarkModeMessageBox.Show("Transaksi berhasil ditambahkan!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                    ClearForm();
+                                    Cache.ClearCache($"Cache:Transaksi_{Session.LoggedInUserId}");
+                                }
+                                else
+                                {
+                                    transaction.Rollback();
+                                    DarkModeMessageBox.Show("Gagal menambahkan transaksi.", "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                }
+                            }
                         }
-                        else
+                        catch
                         {
-                            DarkModeMessageBox.Show("Gagal menambahkan transaksi.", "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            transaction.Rollback();
+                            throw;
                         }
                     }
                 }

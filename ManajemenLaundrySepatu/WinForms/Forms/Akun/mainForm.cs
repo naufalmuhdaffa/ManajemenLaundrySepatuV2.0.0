@@ -103,24 +103,49 @@ namespace ManajemenLaundrySepatu
 
                             if (lockoutEnd != null && lockoutEnd <= DateTime.Now)
                             {
-                                using (SqlCommand resetCmd = new SqlCommand("sp_ResetLoginAttempts", conn))
+                                using (SqlTransaction transaction = conn.BeginTransaction())
                                 {
-                                    resetCmd.CommandType = CommandType.StoredProcedure;
-                                    resetCmd.Parameters.AddWithValue("@username", username);
-                                    resetCmd.ExecuteNonQuery();
-                                }
+                                    try
+                                    {
+                                        using (SqlCommand resetCmd = new SqlCommand("sp_ResetLoginAttempts", conn, transaction))
+                                        {
+                                            resetCmd.CommandType = CommandType.StoredProcedure;
+                                            resetCmd.Parameters.AddWithValue("@username", username);
+                                            resetCmd.ExecuteNonQuery();
+                                        }
 
-                                failedAttempts = 0;
-                                lockoutEnd = null;
+                                        transaction.Commit();
+                                        failedAttempts = 0;
+                                        lockoutEnd = null;
+                                    }
+                                    catch
+                                    {
+                                        transaction.Rollback();
+                                        throw;
+                                    }
+                                }
                             }
 
                             if (dbPasswordHash == hashedPassword)
                             {
-                                using (SqlCommand resetCmd = new SqlCommand("sp_ResetLoginAttempts", conn))
+                                using (SqlTransaction transaction = conn.BeginTransaction())
                                 {
-                                    resetCmd.CommandType = CommandType.StoredProcedure;
-                                    resetCmd.Parameters.AddWithValue("@username", username);
-                                    resetCmd.ExecuteNonQuery();
+                                    try
+                                    {
+                                        using (SqlCommand resetCmd = new SqlCommand("sp_ResetLoginAttempts", conn, transaction))
+                                        {
+                                            resetCmd.CommandType = CommandType.StoredProcedure;
+                                            resetCmd.Parameters.AddWithValue("@username", username);
+                                            resetCmd.ExecuteNonQuery();
+                                        }
+
+                                        transaction.Commit();
+                                    }
+                                    catch
+                                    {
+                                        transaction.Rollback();
+                                        throw;
+                                    }
                                 }
 
                                 DarkModeMessageBox.Show("Login berhasil!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -163,18 +188,32 @@ namespace ManajemenLaundrySepatu
                                 {
                                     newLockoutEnd = DateTime.Now.AddSeconds(30);
                                 }
-                                using (SqlCommand updateCmd = new SqlCommand("sp_UpdateLoginAttempts", conn))
+                                using (SqlTransaction transaction = conn.BeginTransaction())
                                 {
-                                    updateCmd.CommandType = CommandType.StoredProcedure;
-                                    updateCmd.Parameters.AddWithValue("@username", username);
-                                    updateCmd.Parameters.AddWithValue("@failedAttempts", failedAttempts);
-                                    if (newLockoutEnd.HasValue)
-                                        updateCmd.Parameters.AddWithValue("@lockoutEnd", newLockoutEnd.Value);
-                                    else
-                                        updateCmd.Parameters.AddWithValue("@lockoutEnd", DBNull.Value);
+                                    try
+                                    {
+                                        using (SqlCommand updateCmd = new SqlCommand("sp_UpdateLoginAttempts", conn, transaction))
+                                        {
+                                            updateCmd.CommandType = CommandType.StoredProcedure;
+                                            updateCmd.Parameters.AddWithValue("@username", username);
+                                            updateCmd.Parameters.AddWithValue("@failedAttempts", failedAttempts);
+                                            if (newLockoutEnd.HasValue)
+                                                updateCmd.Parameters.AddWithValue("@lockoutEnd", newLockoutEnd.Value);
+                                            else
+                                                updateCmd.Parameters.AddWithValue("@lockoutEnd", DBNull.Value);
 
-                                    updateCmd.ExecuteNonQuery();
+                                            updateCmd.ExecuteNonQuery();
+                                        }
+
+                                        transaction.Commit();
+                                    }
+                                    catch
+                                    {
+                                        transaction.Rollback();
+                                        throw;
+                                    }
                                 }
+
 
                                 if (newLockoutEnd != null)
                                 {

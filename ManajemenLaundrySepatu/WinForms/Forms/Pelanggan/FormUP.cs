@@ -115,27 +115,40 @@ namespace ManajemenLaundrySepatu
                 try
                 {
                     conn.Open();
-                    using (SqlCommand cmd = new SqlCommand("sp_UpdatePelanggan", conn))
+                    using (SqlTransaction transaction = conn.BeginTransaction())
                     {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        cmd.Parameters.AddWithValue("@id_pelanggan", inputIdPelanggan.Texts.Trim());
-                        cmd.Parameters.AddWithValue("@nama", inputNamaPelanggan.Texts.Trim());
-                        cmd.Parameters.AddWithValue("@no_hp", inputNoHP.Texts.Trim());
-                        cmd.Parameters.AddWithValue("@alamat", inputAlamat.Texts.Trim());
-                        cmd.Parameters.AddWithValue("@id_akun", Session.LoggedInUserId);
-
-                        int rowsAffected = cmd.ExecuteNonQuery();
-
-                        if (rowsAffected > 0)
+                        try
                         {
-                            DarkModeMessageBox.Show("Data berhasil diupdate, mantap~", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            Cache.ClearCache($"Cache:Pelanggan_{Session.LoggedInUserId}");
-                            LoadDataPelanggan();
+                            using (SqlCommand cmd = new SqlCommand("sp_UpdatePelanggan", conn, transaction))
+                            {
+                                cmd.CommandType = CommandType.StoredProcedure;
+
+                                cmd.Parameters.AddWithValue("@id_pelanggan", inputIdPelanggan.Texts.Trim());
+                                cmd.Parameters.AddWithValue("@nama", inputNamaPelanggan.Texts.Trim());
+                                cmd.Parameters.AddWithValue("@no_hp", inputNoHP.Texts.Trim());
+                                cmd.Parameters.AddWithValue("@alamat", inputAlamat.Texts.Trim());
+                                cmd.Parameters.AddWithValue("@id_akun", Session.LoggedInUserId);
+
+                                int rowsAffected = cmd.ExecuteNonQuery();
+
+                                if (rowsAffected > 0)
+                                {
+                                    transaction.Commit();
+                                    DarkModeMessageBox.Show("Data berhasil diupdate, mantap~", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                    Cache.ClearCache($"Cache:Pelanggan_{Session.LoggedInUserId}");
+                                    LoadDataPelanggan();
+                                }
+                                else
+                                {
+                                    transaction.Rollback();
+                                    DarkModeMessageBox.Show("Update gagal, coba periksa ID-nya!", "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                }
+                            }
                         }
-                        else
+                        catch
                         {
-                            DarkModeMessageBox.Show("Update gagal, coba periksa ID-nya!", "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            transaction.Rollback();
+                            throw;
                         }
                     }
                 }

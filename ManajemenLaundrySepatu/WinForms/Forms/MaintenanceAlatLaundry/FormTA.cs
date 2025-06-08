@@ -40,24 +40,38 @@ namespace ManajemenLaundrySepatu
                 try
                 {
                     conn.Open();
-                    using (SqlCommand cmd = new SqlCommand("sp_CreateMaintenanceAlatLaundry", conn))
+                    using (SqlTransaction transaction = conn.BeginTransaction())
                     {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@nama_alat", namaAlat);
-                        cmd.Parameters.AddWithValue("@tanggal_maintenance", tanggal);
-                        cmd.Parameters.AddWithValue("@deskripsi", deskripsi);
-                        cmd.Parameters.AddWithValue("@id_akun", idAkun);
+                        try
+                        {
+                            using (SqlCommand cmd = new SqlCommand("sp_CreateMaintenanceAlatLaundry", conn, transaction))
+                            {
+                                cmd.CommandType = CommandType.StoredProcedure;
+                                cmd.Parameters.AddWithValue("@nama_alat", namaAlat);
+                                cmd.Parameters.AddWithValue("@tanggal_maintenance", tanggal);
+                                cmd.Parameters.AddWithValue("@deskripsi", deskripsi);
+                                cmd.Parameters.AddWithValue("@id_akun", idAkun);
 
-                        int rowsAffected = cmd.ExecuteNonQuery();
-                        if (rowsAffected > 0)
-                        {
-                            DarkModeMessageBox.Show("Data Alat Laundry berhasil ditambahkan~", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            ClearForm();
-                            Cache.RemoveCache($"Cache:MaintenanceAlatLaundry_{Session.LoggedInUserId}");
+                                int rowsAffected = cmd.ExecuteNonQuery();
+
+                                if (rowsAffected > 0)
+                                {
+                                    transaction.Commit();
+                                    DarkModeMessageBox.Show("Data Alat Laundry berhasil ditambahkan~", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                    ClearForm();
+                                    Cache.RemoveCache($"Cache:MaintenanceAlatLaundry_{Session.LoggedInUserId}");
+                                }
+                                else
+                                {
+                                    transaction.Rollback();
+                                    DarkModeMessageBox.Show("Gagal menambahkan data Alat Laundry.", "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                }
+                            }
                         }
-                        else
+                        catch
                         {
-                            DarkModeMessageBox.Show("Gagal menambahkan data Alat Laundry.", "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            transaction.Rollback();
+                            throw;
                         }
                     }
                 }

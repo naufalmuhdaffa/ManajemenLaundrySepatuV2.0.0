@@ -129,27 +129,40 @@ namespace ManajemenLaundrySepatu
                 try
                 {
                     conn.Open();
-                    using (SqlCommand cmd = new SqlCommand("sp_CreateSepatu", conn))
+                    using (SqlTransaction transaction = conn.BeginTransaction())
                     {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        cmd.Parameters.AddWithValue("@id_pelanggan", id);
-                        cmd.Parameters.AddWithValue("@merek", merek);
-                        cmd.Parameters.AddWithValue("@jenis", jenis);
-                        cmd.Parameters.AddWithValue("@warna", warna);
-                        cmd.Parameters.AddWithValue("@ukuran", ukuran);
-                        cmd.Parameters.AddWithValue("@id_akun", idAkun);
-
-                        int rowsAffected = cmd.ExecuteNonQuery();
-                        if (rowsAffected > 0)
+                        try
                         {
-                            DarkModeMessageBox.Show("Data sepatu berhasil ditambahkan!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            ClearForm();
-                            Cache.ClearCache($"Cache:Sepatu_{Session.LoggedInUserId}");
+                            using (SqlCommand cmd = new SqlCommand("sp_CreateSepatu", conn, transaction))
+                            {
+                                cmd.CommandType = CommandType.StoredProcedure;
+
+                                cmd.Parameters.AddWithValue("@id_pelanggan", id);
+                                cmd.Parameters.AddWithValue("@merek", merek);
+                                cmd.Parameters.AddWithValue("@jenis", jenis);
+                                cmd.Parameters.AddWithValue("@warna", warna);
+                                cmd.Parameters.AddWithValue("@ukuran", ukuran);
+                                cmd.Parameters.AddWithValue("@id_akun", idAkun);
+
+                                int rowsAffected = cmd.ExecuteNonQuery();
+                                if (rowsAffected > 0)
+                                {
+                                    transaction.Commit();
+                                    DarkModeMessageBox.Show("Data sepatu berhasil ditambahkan!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                    ClearForm();
+                                    Cache.ClearCache($"Cache:Sepatu_{Session.LoggedInUserId}");
+                                }
+                                else
+                                {
+                                    transaction.Rollback();
+                                    DarkModeMessageBox.Show("Gagal menambahkan data sepatu.", "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                }
+                            }
                         }
-                        else
+                        catch
                         {
-                            DarkModeMessageBox.Show("Gagal menambahkan data sepatu.", "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            transaction.Rollback();
+                            throw;
                         }
                     }
                 }

@@ -24,16 +24,26 @@
             this.labelJumlah = new MaterialSkin.Controls.MaterialLabel();
             this.labelSatuan = new MaterialSkin.Controls.MaterialLabel();
             this.SuspendLayout();
+            // 
+            // themeSwitch
+            // 
             this.themeSwitch.Location = new System.Drawing.Point(629, 24);
             this.themeSwitch.Size = new System.Drawing.Size(170, 39);
+            // 
+            // btnKembali
+            // 
             this.btnKembali.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnKembali.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
+            this.btnKembali.BorderColor = System.Drawing.Color.Gray;
+            this.btnKembali.BorderSize = 2;
             this.btnKembali.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnKembali.Density = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonDensity.Default;
+            this.btnKembali.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
             this.btnKembali.Depth = 0;
+            this.btnKembali.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnKembali.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnKembali.HighEmphasis = true;
             this.btnKembali.Icon = null;
+            this.btnKembali.IsDarkTheme = false;
             this.btnKembali.Location = new System.Drawing.Point(7, 405);
             this.btnKembali.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.btnKembali.MouseState = MaterialSkin.MouseState.HOVER;
@@ -42,18 +52,25 @@
             this.btnKembali.Size = new System.Drawing.Size(83, 36);
             this.btnKembali.TabIndex = 5;
             this.btnKembali.Text = "Kembali";
-            this.btnKembali.Type = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonType.Contained;
+            this.btnKembali.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
             this.btnKembali.UseAccentColor = false;
             this.btnKembali.UseVisualStyleBackColor = false;
             this.btnKembali.Click += new System.EventHandler(this.btnKembali_Click);
+            // 
+            // btnTambahkanB
+            // 
             this.btnTambahkanB.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnTambahkanB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
+            this.btnTambahkanB.BorderColor = System.Drawing.Color.Gray;
+            this.btnTambahkanB.BorderSize = 2;
             this.btnTambahkanB.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnTambahkanB.Density = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonDensity.Default;
+            this.btnTambahkanB.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
             this.btnTambahkanB.Depth = 0;
+            this.btnTambahkanB.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnTambahkanB.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnTambahkanB.HighEmphasis = true;
             this.btnTambahkanB.Icon = null;
+            this.btnTambahkanB.IsDarkTheme = false;
             this.btnTambahkanB.Location = new System.Drawing.Point(364, 405);
             this.btnTambahkanB.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.btnTambahkanB.MouseState = MaterialSkin.MouseState.HOVER;
@@ -62,10 +79,13 @@
             this.btnTambahkanB.Size = new System.Drawing.Size(112, 36);
             this.btnTambahkanB.TabIndex = 4;
             this.btnTambahkanB.Text = "Tambahkan";
-            this.btnTambahkanB.Type = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonType.Contained;
+            this.btnTambahkanB.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
             this.btnTambahkanB.UseAccentColor = false;
             this.btnTambahkanB.UseVisualStyleBackColor = false;
             this.btnTambahkanB.Click += new System.EventHandler(this.btnTambahkanB_Click);
+            // 
+            // inputNamaBarang
+            // 
             this.inputNamaBarang.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.inputNamaBarang.BorderColor = System.Drawing.Color.MediumSlateBlue;
             this.inputNamaBarang.BorderFocusColor = System.Drawing.Color.HotPink;
@@ -87,6 +107,9 @@
             this.inputNamaBarang.Texts = "";
             this.inputNamaBarang.UnderlinedStyle = false;
             this.inputNamaBarang.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.inputNamaBarang_KeyPress);
+            // 
+            // inputJumlah
+            // 
             this.inputJumlah.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.inputJumlah.BorderColor = System.Drawing.Color.MediumSlateBlue;
             this.inputJumlah.BorderFocusColor = System.Drawing.Color.HotPink;
@@ -108,6 +131,9 @@
             this.inputJumlah.Texts = "";
             this.inputJumlah.UnderlinedStyle = false;
             this.inputJumlah.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.inputJumlah_KeyPress);
+            // 
+            // inputSatuan
+            // 
             this.inputSatuan.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.inputSatuan.BorderColor = System.Drawing.Color.MediumSlateBlue;
             this.inputSatuan.BorderFocusColor = System.Drawing.Color.HotPink;
@@ -129,6 +155,9 @@
             this.inputSatuan.Texts = "";
             this.inputSatuan.UnderlinedStyle = false;
             this.inputSatuan.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.inputSatuan_KeyPress);
+            // 
+            // labelNamaBarang
+            // 
             this.labelNamaBarang.AutoSize = true;
             this.labelNamaBarang.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.labelNamaBarang.Depth = 0;
@@ -140,6 +169,9 @@
             this.labelNamaBarang.Size = new System.Drawing.Size(55, 19);
             this.labelNamaBarang.TabIndex = 6;
             this.labelNamaBarang.Text = "Nama *";
+            // 
+            // labelJumlah
+            // 
             this.labelJumlah.AutoSize = true;
             this.labelJumlah.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.labelJumlah.Depth = 0;
@@ -151,6 +183,9 @@
             this.labelJumlah.Size = new System.Drawing.Size(66, 19);
             this.labelJumlah.TabIndex = 7;
             this.labelJumlah.Text = "Jumlah *";
+            // 
+            // labelSatuan
+            // 
             this.labelSatuan.AutoSize = true;
             this.labelSatuan.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.labelSatuan.Depth = 0;
@@ -162,6 +197,9 @@
             this.labelSatuan.Size = new System.Drawing.Size(52, 19);
             this.labelSatuan.TabIndex = 8;
             this.labelSatuan.Text = "Satuan";
+            // 
+            // FormTB
+            // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);

@@ -88,24 +88,37 @@ namespace ManajemenLaundrySepatu
                         try
                         {
                             conn.Open();
-                            using (SqlCommand cmd = new SqlCommand("sp_DeleteTransaksi", conn))
+                            using (SqlTransaction transaction = conn.BeginTransaction())
                             {
-                                cmd.CommandType = CommandType.StoredProcedure;
-
-                                cmd.Parameters.AddWithValue("@id_transaksi", idTransaksi);
-                                cmd.Parameters.AddWithValue("@id_akun", Session.LoggedInUserId);
-
-                                int affected = cmd.ExecuteNonQuery();
-
-                                if (affected > 0)
+                                try
                                 {
-                                    DarkModeMessageBox.Show("Transaksi berhasil dihapus!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                    Cache.RemoveCache($"Cache:Transaksi_{Session.LoggedInUserId}");
-                                    LoadDataTransaksi();
+                                    using (SqlCommand cmd = new SqlCommand("sp_DeleteTransaksi", conn, transaction))
+                                    {
+                                        cmd.CommandType = CommandType.StoredProcedure;
+
+                                        cmd.Parameters.AddWithValue("@id_transaksi", idTransaksi);
+                                        cmd.Parameters.AddWithValue("@id_akun", Session.LoggedInUserId);
+
+                                        int affected = cmd.ExecuteNonQuery();
+
+                                        if (affected > 0)
+                                        {
+                                            transaction.Commit();
+                                            DarkModeMessageBox.Show("Transaksi berhasil dihapus!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                            Cache.RemoveCache($"Cache:Transaksi_{Session.LoggedInUserId}");
+                                            LoadDataTransaksi();
+                                        }
+                                        else
+                                        {
+                                            transaction.Rollback();
+                                            DarkModeMessageBox.Show("Transaksi nggak ketemu... seriusan?", "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                        }
+                                    }
                                 }
-                                else
+                                catch
                                 {
-                                    DarkModeMessageBox.Show("Transaksi nggak ketemu... seriusan?", "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                    transaction.Rollback();
+                                    throw;
                                 }
                             }
                         }

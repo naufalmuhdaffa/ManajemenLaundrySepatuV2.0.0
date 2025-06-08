@@ -121,26 +121,39 @@ namespace ManajemenLaundrySepatu
                 try
                 {
                     conn.Open();
-                    using (SqlCommand cmd = new SqlCommand("sp_UpdateBarangKonsumsi", conn))
+                    using (SqlTransaction transaction = conn.BeginTransaction())
                     {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@id_barang", inputIdBarang.Texts.Trim());
-                        cmd.Parameters.AddWithValue("@nama_barang", inputNamaBarang.Texts.Trim());
-                        cmd.Parameters.AddWithValue("@jumlah", jumlah);
-                        cmd.Parameters.AddWithValue("@satuan", inputSatuan.Texts.Trim());
-                        cmd.Parameters.AddWithValue("@id_akun", Session.LoggedInUserId);
-
-                        int rowsAffected = cmd.ExecuteNonQuery();
-
-                        if (rowsAffected > 0)
+                        try
                         {
-                            DarkModeMessageBox.Show("Barang berhasil diupdate, nice~", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            Cache.RemoveCache($"Cache:BarangKonsumsi_{Session.LoggedInUserId}");
-                            LoadDataBarang();
+                            using (SqlCommand cmd = new SqlCommand("sp_UpdateBarangKonsumsi", conn, transaction))
+                            {
+                                cmd.CommandType = CommandType.StoredProcedure;
+                                cmd.Parameters.AddWithValue("@id_barang", inputIdBarang.Texts.Trim());
+                                cmd.Parameters.AddWithValue("@nama_barang", inputNamaBarang.Texts.Trim());
+                                cmd.Parameters.AddWithValue("@jumlah", jumlah);
+                                cmd.Parameters.AddWithValue("@satuan", inputSatuan.Texts.Trim());
+                                cmd.Parameters.AddWithValue("@id_akun", Session.LoggedInUserId);
+
+                                int rowsAffected = cmd.ExecuteNonQuery();
+
+                                if (rowsAffected > 0)
+                                {
+                                    transaction.Commit();
+                                    DarkModeMessageBox.Show("Barang berhasil diupdate, nice~", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                    Cache.RemoveCache($"Cache:BarangKonsumsi_{Session.LoggedInUserId}");
+                                    LoadDataBarang();
+                                }
+                                else
+                                {
+                                    transaction.Rollback();
+                                    DarkModeMessageBox.Show("Update gagal, cek ID-nya bener nggak!", "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                }
+                            }
                         }
-                        else
+                        catch
                         {
-                            DarkModeMessageBox.Show("Update gagal, cek ID-nya bener nggak!", "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            transaction.Rollback();
+                            throw;
                         }
                     }
                 }

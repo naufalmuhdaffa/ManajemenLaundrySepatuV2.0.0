@@ -119,29 +119,42 @@ namespace ManajemenLaundrySepatu
                 try
                 {
                     conn.Open();
-                    using (SqlCommand cmd = new SqlCommand("sp_UpdateSepatu", conn))
+                    using (SqlTransaction transaction = conn.BeginTransaction())
                     {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        cmd.Parameters.AddWithValue("@id_sepatu", inputIdSepatu.Texts.Trim());
-                        cmd.Parameters.AddWithValue("@id_pelanggan", inputIdPelanggan.Texts.Trim());
-                        cmd.Parameters.AddWithValue("@merek", inputMerek.Texts.Trim());
-                        cmd.Parameters.AddWithValue("@jenis", inputJenis.Texts.Trim());
-                        cmd.Parameters.AddWithValue("@warna", inputWarna.Texts.Trim());
-                        cmd.Parameters.AddWithValue("@ukuran", inputUkuran.Texts.Trim());
-                        cmd.Parameters.AddWithValue("@id_akun", Session.LoggedInUserId);
-
-                        int rowsAffected = cmd.ExecuteNonQuery();
-
-                        if (rowsAffected > 0)
+                        try
                         {
-                            DarkModeMessageBox.Show("Data sepatu berhasil diupdate~", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            Cache.ClearCache($"Cache:Sepatu_{Session.LoggedInUserId}");
-                            LoadDataSepatu();
+                            using (SqlCommand cmd = new SqlCommand("sp_UpdateSepatu", conn, transaction))
+                            {
+                                cmd.CommandType = CommandType.StoredProcedure;
+
+                                cmd.Parameters.AddWithValue("@id_sepatu", inputIdSepatu.Texts.Trim());
+                                cmd.Parameters.AddWithValue("@id_pelanggan", inputIdPelanggan.Texts.Trim());
+                                cmd.Parameters.AddWithValue("@merek", inputMerek.Texts.Trim());
+                                cmd.Parameters.AddWithValue("@jenis", inputJenis.Texts.Trim());
+                                cmd.Parameters.AddWithValue("@warna", inputWarna.Texts.Trim());
+                                cmd.Parameters.AddWithValue("@ukuran", inputUkuran.Texts.Trim());
+                                cmd.Parameters.AddWithValue("@id_akun", Session.LoggedInUserId);
+
+                                int rowsAffected = cmd.ExecuteNonQuery();
+
+                                if (rowsAffected > 0)
+                                {
+                                    transaction.Commit();
+                                    DarkModeMessageBox.Show("Data sepatu berhasil diupdate~", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                    Cache.ClearCache($"Cache:Sepatu_{Session.LoggedInUserId}");
+                                    LoadDataSepatu();
+                                }
+                                else
+                                {
+                                    transaction.Rollback();
+                                    DarkModeMessageBox.Show("Update gagal, hmm... ID-nya valid nggak sih?", "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                }
+                            }
                         }
-                        else
+                        catch
                         {
-                            DarkModeMessageBox.Show("Update gagal, hmm... ID-nya valid nggak sih?", "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            transaction.Rollback();
+                            throw;
                         }
                     }
                 }

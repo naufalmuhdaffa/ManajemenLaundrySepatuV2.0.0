@@ -88,23 +88,36 @@ namespace ManajemenLaundrySepatu
                         try
                         {
                             conn.Open();
-                            using (SqlCommand cmd = new SqlCommand("sp_DeleteSepatu", conn))
+                            using (SqlTransaction transaction = conn.BeginTransaction())
                             {
-                                cmd.CommandType = CommandType.StoredProcedure;
-                                cmd.Parameters.AddWithValue("@id_sepatu", idSepatu);
-                                cmd.Parameters.AddWithValue("@id_akun", Session.LoggedInUserId);
-
-                                int affected = cmd.ExecuteNonQuery();
-
-                                if (affected > 0)
+                                try
                                 {
-                                    DarkModeMessageBox.Show("Data sepatu berhasil dihapus!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                    Cache.ClearCache($"Cache:Sepatu_{Session.LoggedInUserId}");
-                                    LoadDataSepatu();
+                                    using (SqlCommand cmd = new SqlCommand("sp_DeleteSepatu", conn, transaction))
+                                    {
+                                        cmd.CommandType = CommandType.StoredProcedure;
+                                        cmd.Parameters.AddWithValue("@id_sepatu", idSepatu);
+                                        cmd.Parameters.AddWithValue("@id_akun", Session.LoggedInUserId);
+
+                                        int affected = cmd.ExecuteNonQuery();
+
+                                        if (affected > 0)
+                                        {
+                                            transaction.Commit();
+                                            DarkModeMessageBox.Show("Data sepatu berhasil dihapus!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                            Cache.ClearCache($"Cache:Sepatu_{Session.LoggedInUserId}");
+                                            LoadDataSepatu();
+                                        }
+                                        else
+                                        {
+                                            transaction.Rollback();
+                                            DarkModeMessageBox.Show("Data sepatu tidak ditemukan!", "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                        }
+                                    }
                                 }
-                                else
+                                catch
                                 {
-                                    DarkModeMessageBox.Show("Data sepatu tidak ditemukan!", "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                    transaction.Rollback();
+                                    throw;
                                 }
                             }
                         }

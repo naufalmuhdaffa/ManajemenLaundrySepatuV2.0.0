@@ -87,23 +87,36 @@ namespace ManajemenLaundrySepatu
                         try
                         {
                             conn.Open();
-                            using (SqlCommand cmd = new SqlCommand("sp_DeleteBarangKonsumsi", conn))
+                            using (SqlTransaction transaction = conn.BeginTransaction())
                             {
-                                cmd.CommandType = CommandType.StoredProcedure;
-
-                                cmd.Parameters.AddWithValue("@id_barang", idBarang);
-                                cmd.Parameters.AddWithValue("@id_akun", Session.LoggedInUserId);
-                                int affected = cmd.ExecuteNonQuery();
-
-                                if (affected > 0)
+                                try
                                 {
-                                    DarkModeMessageBox.Show("Barang berhasil dihapus, bye-bye~", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                    Cache.RemoveCache($"Cache:BarangKonsumsi_{Session.LoggedInUserId}");
-                                    LoadDataBarang();
+                                    using (SqlCommand cmd = new SqlCommand("sp_DeleteBarangKonsumsi", conn, transaction))
+                                    {
+                                        cmd.CommandType = CommandType.StoredProcedure;
+                                        cmd.Parameters.AddWithValue("@id_barang", idBarang);
+                                        cmd.Parameters.AddWithValue("@id_akun", Session.LoggedInUserId);
+
+                                        int affected = cmd.ExecuteNonQuery();
+
+                                        if (affected > 0)
+                                        {
+                                            transaction.Commit();
+                                            DarkModeMessageBox.Show("Barang berhasil dihapus, bye-bye~", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                            Cache.RemoveCache($"Cache:BarangKonsumsi_{Session.LoggedInUserId}");
+                                            LoadDataBarang();
+                                        }
+                                        else
+                                        {
+                                            transaction.Rollback();
+                                            DarkModeMessageBox.Show("Barang nggak ditemukan! Kamu yakin pilih yang benar?", "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                        }
+                                    }
                                 }
-                                else
+                                catch
                                 {
-                                    DarkModeMessageBox.Show("Barang nggak ditemukan! Kamu yakin pilih yang benar?", "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                    transaction.Rollback();
+                                    throw;
                                 }
                             }
                         }
@@ -112,6 +125,7 @@ namespace ManajemenLaundrySepatu
                             DarkModeMessageBox.Show("Error saat menghapus barang: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
+
                 }
             }
             else

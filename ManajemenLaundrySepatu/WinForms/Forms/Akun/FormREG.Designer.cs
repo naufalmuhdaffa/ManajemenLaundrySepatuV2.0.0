@@ -26,8 +26,14 @@
             this.inputConfirmPassword = new ManajemenLaundrySepatu.MyTextBox();
             this.btnShowPassword = new ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton();
             this.SuspendLayout();
+            // 
+            // themeSwitch
+            // 
             this.themeSwitch.Location = new System.Drawing.Point(629, 24);
             this.themeSwitch.Size = new System.Drawing.Size(170, 39);
+            // 
+            // linkLabelLogin
+            // 
             this.linkLabelLogin.AutoSize = true;
             this.linkLabelLogin.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.linkLabelLogin.Cursor = System.Windows.Forms.Cursors.Hand;
@@ -44,6 +50,9 @@
             this.linkLabelLogin.UseCompatibleTextRendering = true;
             this.linkLabelLogin.VisitedLinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(218)))), ((int)(((byte)(198)))));
             this.linkLabelLogin.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelLogin_LinkClicked);
+            // 
+            // labelAkun
+            // 
             this.labelAkun.AutoSize = true;
             this.labelAkun.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.labelAkun.Depth = 0;
@@ -55,6 +64,9 @@
             this.labelAkun.Size = new System.Drawing.Size(144, 19);
             this.labelAkun.TabIndex = 10;
             this.labelAkun.Text = "Sudah Punya Akun?";
+            // 
+            // labelPassword
+            // 
             this.labelPassword.AutoSize = true;
             this.labelPassword.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.labelPassword.Depth = 0;
@@ -66,6 +78,9 @@
             this.labelPassword.Size = new System.Drawing.Size(71, 19);
             this.labelPassword.TabIndex = 8;
             this.labelPassword.Text = "Password";
+            // 
+            // inputPassword
+            // 
             this.inputPassword.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.inputPassword.BorderColor = System.Drawing.Color.MediumSlateBlue;
             this.inputPassword.BorderFocusColor = System.Drawing.Color.HotPink;
@@ -87,6 +102,9 @@
             this.inputPassword.Texts = "";
             this.inputPassword.UnderlinedStyle = false;
             this.inputPassword.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.inputPassword_KeyPress);
+            // 
+            // labelUsername
+            // 
             this.labelUsername.AutoSize = true;
             this.labelUsername.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.labelUsername.Depth = 0;
@@ -98,6 +116,9 @@
             this.labelUsername.Size = new System.Drawing.Size(72, 19);
             this.labelUsername.TabIndex = 7;
             this.labelUsername.Text = "Username";
+            // 
+            // inputUsername
+            // 
             this.inputUsername.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.inputUsername.BorderColor = System.Drawing.Color.MediumSlateBlue;
             this.inputUsername.BorderFocusColor = System.Drawing.Color.HotPink;
@@ -119,29 +140,40 @@
             this.inputUsername.Texts = "";
             this.inputUsername.UnderlinedStyle = false;
             this.inputUsername.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.inputUsername_KeyPress);
+            // 
+            // btnRegister
+            // 
+            this.btnRegister.AutoSize = false;
             this.btnRegister.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnRegister.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
+            this.btnRegister.BorderColor = System.Drawing.Color.Gray;
+            this.btnRegister.BorderSize = 2;
             this.btnRegister.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnRegister.Density = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonDensity.Default;
+            this.btnRegister.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
             this.btnRegister.Depth = 0;
             this.btnRegister.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
             this.btnRegister.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(136)))), ((int)(((byte)(54)))), ((int)(((byte)(82)))), ((int)(((byte)(104)))));
+            this.btnRegister.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnRegister.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnRegister.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnRegister.HighEmphasis = true;
             this.btnRegister.Icon = null;
-            this.btnRegister.Location = new System.Drawing.Point(351, 323);
+            this.btnRegister.IsDarkTheme = false;
+            this.btnRegister.Location = new System.Drawing.Point(274, 316);
             this.btnRegister.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.btnRegister.MouseState = MaterialSkin.MouseState.HOVER;
             this.btnRegister.Name = "btnRegister";
             this.btnRegister.NoAccentTextColor = System.Drawing.Color.Empty;
-            this.btnRegister.Size = new System.Drawing.Size(89, 36);
+            this.btnRegister.Size = new System.Drawing.Size(242, 58);
             this.btnRegister.TabIndex = 5;
             this.btnRegister.Text = "Register";
-            this.btnRegister.Type = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonType.Contained;
+            this.btnRegister.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
             this.btnRegister.UseAccentColor = false;
             this.btnRegister.UseVisualStyleBackColor = false;
             this.btnRegister.Click += new System.EventHandler(this.btnRegister_Click);
+            // 
+            // labelKonfirmasiPassword
+            // 
             this.labelKonfirmasiPassword.AutoSize = true;
             this.labelKonfirmasiPassword.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.labelKonfirmasiPassword.Depth = 0;
@@ -153,6 +185,9 @@
             this.labelKonfirmasiPassword.Size = new System.Drawing.Size(153, 19);
             this.labelKonfirmasiPassword.TabIndex = 9;
             this.labelKonfirmasiPassword.Text = "Konfirmasi Password";
+            // 
+            // inputConfirmPassword
+            // 
             this.inputConfirmPassword.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.inputConfirmPassword.BorderColor = System.Drawing.Color.MediumSlateBlue;
             this.inputConfirmPassword.BorderFocusColor = System.Drawing.Color.HotPink;
@@ -174,16 +209,23 @@
             this.inputConfirmPassword.Texts = "";
             this.inputConfirmPassword.UnderlinedStyle = false;
             this.inputConfirmPassword.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.inputConfirmPassword_KeyPress);
+            // 
+            // btnShowPassword
+            // 
             this.btnShowPassword.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnShowPassword.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
-            this.btnShowPassword.Density = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonDensity.Default;
+            this.btnShowPassword.BorderColor = System.Drawing.Color.Gray;
+            this.btnShowPassword.BorderSize = 2;
+            this.btnShowPassword.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
             this.btnShowPassword.Depth = 0;
             this.btnShowPassword.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(55)))), ((int)(((byte)(55)))));
             this.btnShowPassword.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(136)))), ((int)(((byte)(54)))), ((int)(((byte)(82)))), ((int)(((byte)(104)))));
-            this.btnShowPassword.Font = new System.Drawing.Font("Microsoft Sans Serif", 5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnShowPassword.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnShowPassword.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnShowPassword.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnShowPassword.HighEmphasis = true;
             this.btnShowPassword.Icon = null;
+            this.btnShowPassword.IsDarkTheme = false;
             this.btnShowPassword.Location = new System.Drawing.Point(689, 169);
             this.btnShowPassword.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.btnShowPassword.MouseState = MaterialSkin.MouseState.HOVER;
@@ -192,10 +234,13 @@
             this.btnShowPassword.Size = new System.Drawing.Size(104, 36);
             this.btnShowPassword.TabIndex = 3;
             this.btnShowPassword.Text = "Tampilkan";
-            this.btnShowPassword.Type = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonType.Contained;
+            this.btnShowPassword.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
             this.btnShowPassword.UseAccentColor = false;
             this.btnShowPassword.UseVisualStyleBackColor = false;
             this.btnShowPassword.Click += new System.EventHandler(this.btnShowPassword_Click);
+            // 
+            // FormREG
+            // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);

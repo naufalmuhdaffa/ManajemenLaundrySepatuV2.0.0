@@ -88,23 +88,36 @@ namespace ManajemenLaundrySepatu
                         try
                         {
                             conn.Open();
-                            using (SqlCommand cmd = new SqlCommand("sp_DeletePelanggan", conn))
+                            using (SqlTransaction transaction = conn.BeginTransaction())
                             {
-                                cmd.CommandType = CommandType.StoredProcedure;
-                                cmd.Parameters.AddWithValue("@id_pelanggan", idPelanggan);
-                                cmd.Parameters.AddWithValue("@id_akun", Session.LoggedInUserId);
-
-                                int affected = cmd.ExecuteNonQuery();
-
-                                if (affected > 0)
+                                try
                                 {
-                                    DarkModeMessageBox.Show("Data pelanggan berhasil dihapus!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                    Cache.ClearCache($"Cache:Pelanggan_{Session.LoggedInUserId}");
-                                    LoadDataPelanggan();
+                                    using (SqlCommand cmd = new SqlCommand("sp_DeletePelanggan", conn, transaction))
+                                    {
+                                        cmd.CommandType = CommandType.StoredProcedure;
+                                        cmd.Parameters.AddWithValue("@id_pelanggan", idPelanggan);
+                                        cmd.Parameters.AddWithValue("@id_akun", Session.LoggedInUserId);
+
+                                        int affected = cmd.ExecuteNonQuery();
+
+                                        if (affected > 0)
+                                        {
+                                            transaction.Commit();
+                                            DarkModeMessageBox.Show("Data pelanggan berhasil dihapus!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                            Cache.ClearCache($"Cache:Pelanggan_{Session.LoggedInUserId}");
+                                            LoadDataPelanggan();
+                                        }
+                                        else
+                                        {
+                                            transaction.Rollback();
+                                            DarkModeMessageBox.Show("Data pelanggan tidak ditemukan!", "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                        }
+                                    }
                                 }
-                                else
+                                catch
                                 {
-                                    DarkModeMessageBox.Show("Data pelanggan tidak ditemukan!", "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                    transaction.Rollback();
+                                    throw;
                                 }
                             }
                         }

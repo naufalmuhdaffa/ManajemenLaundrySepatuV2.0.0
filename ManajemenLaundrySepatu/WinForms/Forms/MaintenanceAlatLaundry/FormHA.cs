@@ -87,24 +87,37 @@ namespace ManajemenLaundrySepatu
                         try
                         {
                             conn.Open();
-                            using (SqlCommand cmd = new SqlCommand("sp_DeleteMaintenanceAlatLaundry", conn))
+                            using (SqlTransaction transaction = conn.BeginTransaction())
                             {
-                                cmd.CommandType = CommandType.StoredProcedure;
-
-                                cmd.Parameters.AddWithValue("@id_maintenance", idAlat);
-                                cmd.Parameters.AddWithValue("@id_akun", Session.LoggedInUserId);
-
-                                int affected = cmd.ExecuteNonQuery();
-
-                                if (affected > 0)
+                                try
                                 {
-                                    DarkModeMessageBox.Show("Data alat berhasil dihapus!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                    Cache.ClearCache($"Cache:MaintenanceAlatLaundry_{Session.LoggedInUserId}");
-                                    LoadDataAlat();
+                                    using (SqlCommand cmd = new SqlCommand("sp_DeleteMaintenanceAlatLaundry", conn, transaction))
+                                    {
+                                        cmd.CommandType = CommandType.StoredProcedure;
+
+                                        cmd.Parameters.AddWithValue("@id_maintenance", idAlat);
+                                        cmd.Parameters.AddWithValue("@id_akun", Session.LoggedInUserId);
+
+                                        int affected = cmd.ExecuteNonQuery();
+
+                                        if (affected > 0)
+                                        {
+                                            transaction.Commit();
+                                            DarkModeMessageBox.Show("Data alat berhasil dihapus!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                            Cache.ClearCache($"Cache:MaintenanceAlatLaundry_{Session.LoggedInUserId}");
+                                            LoadDataAlat();
+                                        }
+                                        else
+                                        {
+                                            transaction.Rollback();
+                                            DarkModeMessageBox.Show("Data nggak ketemu... kamu yakin pilih barisnya?", "Oops", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                        }
+                                    }
                                 }
-                                else
+                                catch
                                 {
-                                    DarkModeMessageBox.Show("Data nggak ketemu... kamu yakin pilih barisnya?", "Oops", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                    transaction.Rollback();
+                                    throw;
                                 }
                             }
                         }

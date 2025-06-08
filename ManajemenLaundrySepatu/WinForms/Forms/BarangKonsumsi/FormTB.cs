@@ -46,25 +46,38 @@ namespace ManajemenLaundrySepatu
                 try
                 {
                     conn.Open();
-                    using (SqlCommand cmd = new SqlCommand("sp_CreateBarangKonsumsi", conn))
+                    using (SqlTransaction transaction = conn.BeginTransaction())
                     {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        cmd.Parameters.AddWithValue("@nama_barang", nama);
-                        cmd.Parameters.AddWithValue("@jumlah", jumlah);
-                        cmd.Parameters.AddWithValue("@satuan", satuan);
-                        cmd.Parameters.AddWithValue("@id_akun", idAkun);
-
-                        int rowsAffected = cmd.ExecuteNonQuery();
-                        if (rowsAffected > 0)
+                        try
                         {
-                            DarkModeMessageBox.Show("Barang berhasil ditambahkan!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            ClearForm();
-                            Cache.RemoveCache($"Cache:BarangKonsumsi_{Session.LoggedInUserId}");
+                            using (SqlCommand cmd = new SqlCommand("sp_CreateBarangKonsumsi", conn, transaction))
+                            {
+                                cmd.CommandType = CommandType.StoredProcedure;
+
+                                cmd.Parameters.AddWithValue("@nama_barang", nama);
+                                cmd.Parameters.AddWithValue("@jumlah", jumlah);
+                                cmd.Parameters.AddWithValue("@satuan", satuan);
+                                cmd.Parameters.AddWithValue("@id_akun", idAkun);
+
+                                int rowsAffected = cmd.ExecuteNonQuery();
+                                if (rowsAffected > 0)
+                                {
+                                    transaction.Commit();
+                                    DarkModeMessageBox.Show("Barang berhasil ditambahkan!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                    ClearForm();
+                                    Cache.RemoveCache($"Cache:BarangKonsumsi_{Session.LoggedInUserId}");
+                                }
+                                else
+                                {
+                                    transaction.Rollback();
+                                    DarkModeMessageBox.Show("Gagal menambahkan barang.", "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                }
+                            }
                         }
-                        else
+                        catch
                         {
-                            DarkModeMessageBox.Show("Gagal menambahkan barang.", "Gagal", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            transaction.Rollback();
+                            throw;
                         }
                     }
                 }

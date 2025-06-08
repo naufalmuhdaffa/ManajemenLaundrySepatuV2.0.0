@@ -66,28 +66,42 @@ namespace ManajemenLaundrySepatu
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
+                conn.Open();
+                SqlTransaction transaction = conn.BeginTransaction();
+
                 try
                 {
-                    conn.Open();
-                    using (SqlCommand command = new SqlCommand("sp_CreateAkun", conn))
+                    using (SqlCommand command = new SqlCommand("sp_CreateAkun", conn, transaction))
                     {
                         command.CommandType = CommandType.StoredProcedure;
                         command.Parameters.AddWithValue("@Username", username);
                         command.Parameters.AddWithValue("@PasswordHash", hashedPassword);
                         command.ExecuteNonQuery();
-
-                        DarkModeMessageBox.Show("Registrasi berhasil!", "Informasi", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        inputUsername.Clear();
-                        inputPassword.Clear();
-                        inputConfirmPassword.Clear();
-                        inputUsername.Focus();
                     }
+
+                    transaction.Commit();
+
+                    DarkModeMessageBox.Show("Registrasi berhasil!", "Informasi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    inputUsername.Clear();
+                    inputPassword.Clear();
+                    inputConfirmPassword.Clear();
+                    inputUsername.Focus();
                 }
                 catch (SqlException ex)
                 {
+                    try
+                    {
+                        transaction.Rollback();
+                    }
+                    catch (Exception rollbackEx)
+                    {
+                        DarkModeMessageBox.Show("Rollback gagal: " + rollbackEx.Message, "Kesalahan", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+
                     DarkModeMessageBox.Show("Terjadi kesalahan saat registrasi: " + ex.Message, "Kesalahan", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+
         }
 
         private void linkLabelLogin_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
