@@ -241,6 +241,24 @@ namespace ManajemenLaundrySepatu
         }
 
         [Category("RJ Code - Data")]
+        [Description("Menentukan tinggi dropdown (dalam pixel) sebelum scrollbar muncul.")]
+        [DefaultValue(106)] // nilai default ComboBox.DropDownHeight
+        public int DropDownHeight
+        {
+            get => cmbList.DropDownHeight;
+            set => cmbList.DropDownHeight = value;
+        }
+
+        [Category("RJ Code - Data")]
+        [Description("Maksimum jumlah item yang terlihat sebelum muncul scrollbar.")]
+        [DefaultValue(8)]
+        public int MaxDropDownItems
+        {
+            get => cmbList.MaxDropDownItems;
+            set => cmbList.MaxDropDownItems = value;
+        }
+
+        [Category("RJ Code - Data")]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
         [Editor("System.Windows.Forms.Design.ListControlStringCollectionEditor, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
         [Localizable(true)]

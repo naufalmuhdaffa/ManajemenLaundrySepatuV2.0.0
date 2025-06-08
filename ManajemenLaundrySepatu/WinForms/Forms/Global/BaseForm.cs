@@ -299,6 +299,8 @@ namespace ManajemenLaundrySepatu
 
                         mcb.BorderSize = 1;
                         mcb.BorderColor = Color.FromArgb(255, 90, 0);
+                        mcb.DropDownHeight = 175;
+                        mcb.MaxDropDownItems = 5;
                     }
                     else
                     {
@@ -311,6 +313,8 @@ namespace ManajemenLaundrySepatu
 
                         mcb.BorderSize = 1;
                         mcb.BorderColor = Color.FromArgb(13, 71, 161);
+                        mcb.DropDownHeight = 175;
+                        mcb.MaxDropDownItems = 5;
                     }
                     mcb.Invalidate();
                 }

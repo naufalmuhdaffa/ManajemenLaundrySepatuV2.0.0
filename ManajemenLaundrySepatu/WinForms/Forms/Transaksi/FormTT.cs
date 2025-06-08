@@ -107,40 +107,38 @@ namespace ManajemenLaundrySepatu
                     new FormToast($"Data Sepatu di-load dari cache\nTerakhir update: {lastUpdate}").Show();
                 }
             }
-            else
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                using (SqlConnection conn = new SqlConnection(connectionString))
+                try
                 {
-                    try
+                    conn.Open();
+                    using (SqlCommand cmd = new SqlCommand("sp_ReadSepatu", conn))
                     {
-                        conn.Open();
-                        using (SqlCommand cmd = new SqlCommand("sp_ReadSepatu", conn))
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@id_akun", idAkun);
+
+                        using (SqlDataReader reader = cmd.ExecuteReader())
                         {
-                            cmd.CommandType = CommandType.StoredProcedure;
-                            cmd.Parameters.AddWithValue("@id_akun", idAkun);
-
-                            using (SqlDataReader reader = cmd.ExecuteReader())
+                            Dictionary<int, string> sepatuDict = new Dictionary<int, string>();
+                            while (reader.Read())
                             {
-                                Dictionary<int, string> sepatuDict = new Dictionary<int, string>();
-                                while (reader.Read())
-                                {
-                                    int id = Convert.ToInt32(reader["ID Sepatu"]);
-                                    string merek = reader["Merek"].ToString();
-                                    sepatuDict[id] = $"{id} - {merek}";
-                                }
-
-                                inputIdSepatu.DataSource = new BindingSource(sepatuDict, null);
-                                inputIdSepatu.DisplayMember = "Value";
-                                inputIdSepatu.ValueMember = "Key";
-
-                                Cache.SetCache(cacheSepatuKey, sepatuDict, 300);
+                                int id = Convert.ToInt32(reader["ID Sepatu"]);
+                                string merek = reader["Merek"].ToString();
+                                sepatuDict[id] = $"{id} - {merek}";
                             }
+
+                            inputIdSepatu.DataSource = new BindingSource(sepatuDict, null);
+                            inputIdSepatu.DisplayMember = "Value";
+                            inputIdSepatu.ValueMember = "Key";
+
+                            Cache.SetCache(cacheSepatuKey, sepatuDict, 300);
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        DarkModeMessageBox.Show("Gagal memuat data sepatu: " + ex.Message);
-                    }
+                }
+                catch (Exception ex)
+                {
+                    DarkModeMessageBox.Show("Gagal memuat data sepatu: " + ex.Message);
                 }
             }
         }

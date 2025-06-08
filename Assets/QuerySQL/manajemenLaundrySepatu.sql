@@ -126,6 +126,7 @@ ALTER TABLE Pelanggan
 ADD id_akun INT NOT NULL
     FOREIGN KEY REFERENCES Akun(id);
 
+
 					--== Tabel Sepatu ==--
 
   -- Periksa Constraint Sebelum Alter --
@@ -187,6 +188,18 @@ ALTER TABLE Sepatu
 ADD id_akun INT NOT NULL
     FOREIGN KEY REFERENCES Akun(id);
 
+
+        -- Foreign Key Cascade --
+ALTER TABLE Sepatu
+DROP CONSTRAINT FK__Sepatu__id_pelan__3A81B327;
+
+ALTER TABLE Sepatu
+  ADD CONSTRAINT FK_Sepatu_Pelanggan
+    FOREIGN KEY (id_pelanggan)
+    REFERENCES Pelanggan(id_pelanggan)
+    ON DELETE CASCADE;
+
+
 					--== Tabel Transaksi ==--
 
   -- Periksa Constraint Sebelum Alter --
@@ -224,6 +237,22 @@ CHECK (
 ALTER TABLE Transaksi
 ADD id_akun INT NOT NULL
     FOREIGN KEY REFERENCES Akun(id);
+
+
+    -- Foreign Key Cascade --
+ALTER TABLE Transaksi
+DROP CONSTRAINT FK__Transaksi__id_pe__4316F928;
+
+ALTER TABLE Transaksi
+DROP CONSTRAINT FK__Transaksi__id_se__440B1D61;
+
+ALTER TABLE Transaksi
+ADD CONSTRAINT FK_Transaksi_Sepatu
+  FOREIGN KEY (id_sepatu)
+  REFERENCES Sepatu(id_sepatu)
+  ON DELETE CASCADE;
+
+
 
 					--== Tabel Barang_Konsumsi ==--
 
@@ -331,34 +360,43 @@ UNIQUE (
 					--== Trigger ==--
 					--=============--
 
-  -- Pelanggan --
-CREATE TRIGGER trg_DeletePelanggan
+-- Trigger setelah delete di Pelanggan
+CREATE TRIGGER trg_AfterDeletePelanggan
 ON Pelanggan
-INSTEAD OF DELETE
+AFTER DELETE
 AS
 BEGIN
-    DELETE FROM Transaksi
-    WHERE id_sepatu IN (SELECT id_sepatu FROM Sepatu WHERE id_pelanggan IN (SELECT id_pelanggan FROM DELETED));
+    SET NOCOUNT ON;
 
-    DELETE FROM Sepatu
-    WHERE id_pelanggan IN (SELECT id_pelanggan FROM DELETED);
+    -- 1) Hapus Transaksi via Sepatu milik pelanggan ini
+    DELETE t
+    FROM Transaksi t
+    JOIN Sepatu s
+      ON t.id_sepatu = s.id_sepatu
+    WHERE s.id_pelanggan IN (SELECT id_pelanggan FROM deleted);
 
-    DELETE FROM Pelanggan
-    WHERE id_pelanggan IN (SELECT id_pelanggan FROM DELETED);
+    -- 2) Hapus Sepatu milik pelanggan ini
+    DELETE s
+    FROM Sepatu s
+    WHERE s.id_pelanggan IN (SELECT id_pelanggan FROM deleted);
 END;
+GO
 
-  -- Sepatu --
-CREATE TRIGGER trg_DeleteSepatu
+-- Trigger setelah delete di Sepatu
+CREATE TRIGGER trg_AfterDeleteSepatu
 ON Sepatu
-INSTEAD OF DELETE
+AFTER DELETE
 AS
 BEGIN
-	DELETE FROM Transaksi
-    WHERE id_sepatu IN (SELECT id_sepatu FROM DELETED);
+    SET NOCOUNT ON;
 
-    DELETE FROM Sepatu
-    WHERE id_sepatu IN (SELECT id_sepatu FROM DELETED);
+    -- Hapus Transaksi yang berelasi
+    DELETE t
+    FROM Transaksi t
+    WHERE t.id_sepatu IN (SELECT id_sepatu FROM deleted);
 END;
+GO
+
 
   -- Maintenance_Alat_Laundry --
 CREATE TRIGGER trg_ValidasiUpdateMaintenance
