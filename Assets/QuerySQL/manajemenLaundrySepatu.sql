@@ -1654,6 +1654,28 @@ ELSE
     PRINT 'idx_MaintenanceAlatLaundry_RUD sudah ada.';
 
 
+SELECT 
+    OBJECT_NAME(ius.object_id) AS TableName,
+    i.name AS IndexName,
+    i.type_desc AS IndexType,
+    ius.user_seeks,
+    ius.user_scans,
+    ius.user_lookups,
+    ius.user_updates,
+    ius.last_user_seek,
+    ius.last_user_scan
+FROM sys.dm_db_index_usage_stats ius
+JOIN sys.indexes i ON i.object_id = ius.object_id AND i.index_id = ius.index_id
+WHERE ius.database_id = DB_ID('manajemenLaundrySepatu')
+ORDER BY ius.user_seeks DESC;
+
+
+SET SHOWPLAN_TEXT ON;
+EXEC sp_ReadViewTransaksi @id_akun = 1;
+SET SHOWPLAN_TEXT OFF;
+
+
+
 					--======================--
 					--== Backup & Restore ==--
 					--======================--
