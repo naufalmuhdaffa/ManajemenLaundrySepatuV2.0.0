@@ -468,7 +468,7 @@ DBCC CHECKIDENT ('Akun', RESEED, 0);
 					--===================--
 
   -- Pelanggan
-SELECT nama FROM Pelanggan where nama = nama;
+SELECT nama FROM Pelanggan;
 DELETE FROM Pelanggan;
 
   -- Sepatu
@@ -491,7 +491,7 @@ DELETE FROM Maintenance_Alat_Laundry;
 SELECT * FROM Akun;
 DELETE FROM Akun;
 
-
+exec sp_helpindex 'Transaksi';
 
 					--======================--
 					--== Stored Procedure ==--
