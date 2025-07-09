@@ -1,4 +1,5 @@
 ﻿using ManajemenLaundrySepatu.Helpers;
+using ManajemenLaundrySepatu.WinForms.Helpers;
 using System;
 using System.Data;
 using System.Data.SqlClient;
@@ -13,8 +14,8 @@ namespace ManajemenLaundrySepatu
 {
     public partial class FormBAK : BaseForm
     {
-        private readonly string masterConnection = "Data Source=LAPTOP-GIV3RJG5\\NADA;Initial Catalog=master;Integrated Security=True";
-        private readonly string connectionString = "Data Source=LAPTOP-GIV3RJG5\\NADA;Initial Catalog=manajemenLaundrySepatu;Integrated Security=True";
+        private readonly string masterConnection = DbConfig.ConnectionString;
+        private readonly string connectionString = DbConfig.ConnectionString;
         private const string backupProcedure = "sp_BackupDatabase";
         private const string restoreProcedure = "sp_RestoreDatabase";
 

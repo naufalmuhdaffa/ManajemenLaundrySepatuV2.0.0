@@ -26,8 +26,15 @@
             this.btnTambahkanP = new ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton();
             this.btnKembali = new ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton();
             this.SuspendLayout();
-            this.themeSwitch.Location = new System.Drawing.Point(629, 24);
-            this.themeSwitch.Size = new System.Drawing.Size(170, 39);
+            // 
+            // themeSwitch
+            // 
+            this.themeSwitch.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.776372F);
+            this.themeSwitch.Location = new System.Drawing.Point(11, 87);
+            this.themeSwitch.Size = new System.Drawing.Size(117, 30);
+            // 
+            // labelAlamat
+            // 
             this.labelAlamat.AutoSize = true;
             this.labelAlamat.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.labelAlamat.Depth = 0;
@@ -39,6 +46,9 @@
             this.labelAlamat.Size = new System.Drawing.Size(52, 19);
             this.labelAlamat.TabIndex = 10;
             this.labelAlamat.Text = "Alamat";
+            // 
+            // labelNoHP
+            // 
             this.labelNoHP.AutoSize = true;
             this.labelNoHP.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.labelNoHP.Depth = 0;
@@ -50,6 +60,9 @@
             this.labelNoHP.Size = new System.Drawing.Size(57, 19);
             this.labelNoHP.TabIndex = 9;
             this.labelNoHP.Text = "No HP *";
+            // 
+            // labelNamaPelanggan
+            // 
             this.labelNamaPelanggan.AutoSize = true;
             this.labelNamaPelanggan.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.labelNamaPelanggan.Depth = 0;
@@ -61,6 +74,9 @@
             this.labelNamaPelanggan.Size = new System.Drawing.Size(55, 19);
             this.labelNamaPelanggan.TabIndex = 8;
             this.labelNamaPelanggan.Text = "Nama *";
+            // 
+            // labelIdPelanggan
+            // 
             this.labelIdPelanggan.AutoSize = true;
             this.labelIdPelanggan.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.labelIdPelanggan.Depth = 0;
@@ -72,6 +88,9 @@
             this.labelIdPelanggan.Size = new System.Drawing.Size(107, 19);
             this.labelIdPelanggan.TabIndex = 7;
             this.labelIdPelanggan.Text = "ID Pelanggan *";
+            // 
+            // inputAlamat
+            // 
             this.inputAlamat.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.inputAlamat.BorderColor = System.Drawing.Color.MediumSlateBlue;
             this.inputAlamat.BorderFocusColor = System.Drawing.Color.HotPink;
@@ -88,11 +107,14 @@
             this.inputAlamat.PlaceholderColor = System.Drawing.Color.DarkGray;
             this.inputAlamat.PlaceholderText = "";
             this.inputAlamat.ReadOnly = false;
-            this.inputAlamat.Size = new System.Drawing.Size(400, 32);
+            this.inputAlamat.Size = new System.Drawing.Size(400, 33);
             this.inputAlamat.TabIndex = 4;
             this.inputAlamat.Texts = "";
             this.inputAlamat.UnderlinedStyle = false;
             this.inputAlamat.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.inputAlamat_KeyPress);
+            // 
+            // inputNoHP
+            // 
             this.inputNoHP.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.inputNoHP.BorderColor = System.Drawing.Color.MediumSlateBlue;
             this.inputNoHP.BorderFocusColor = System.Drawing.Color.HotPink;
@@ -109,11 +131,14 @@
             this.inputNoHP.PlaceholderColor = System.Drawing.Color.DarkGray;
             this.inputNoHP.PlaceholderText = "";
             this.inputNoHP.ReadOnly = false;
-            this.inputNoHP.Size = new System.Drawing.Size(400, 32);
+            this.inputNoHP.Size = new System.Drawing.Size(400, 33);
             this.inputNoHP.TabIndex = 3;
             this.inputNoHP.Texts = "";
             this.inputNoHP.UnderlinedStyle = false;
             this.inputNoHP.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.inputNoHP_KeyPress);
+            // 
+            // inputNamaPelanggan
+            // 
             this.inputNamaPelanggan.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.inputNamaPelanggan.BorderColor = System.Drawing.Color.MediumSlateBlue;
             this.inputNamaPelanggan.BorderFocusColor = System.Drawing.Color.HotPink;
@@ -130,11 +155,14 @@
             this.inputNamaPelanggan.PlaceholderColor = System.Drawing.Color.DarkGray;
             this.inputNamaPelanggan.PlaceholderText = "";
             this.inputNamaPelanggan.ReadOnly = false;
-            this.inputNamaPelanggan.Size = new System.Drawing.Size(400, 32);
+            this.inputNamaPelanggan.Size = new System.Drawing.Size(400, 33);
             this.inputNamaPelanggan.TabIndex = 2;
             this.inputNamaPelanggan.Texts = "";
             this.inputNamaPelanggan.UnderlinedStyle = false;
             this.inputNamaPelanggan.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.inputNamaPelanggan_KeyPress);
+            // 
+            // inputIdPelanggan
+            // 
             this.inputIdPelanggan.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.inputIdPelanggan.BorderColor = System.Drawing.Color.MediumSlateBlue;
             this.inputIdPelanggan.BorderFocusColor = System.Drawing.Color.HotPink;
@@ -151,19 +179,26 @@
             this.inputIdPelanggan.PlaceholderColor = System.Drawing.Color.DarkGray;
             this.inputIdPelanggan.PlaceholderText = "";
             this.inputIdPelanggan.ReadOnly = false;
-            this.inputIdPelanggan.Size = new System.Drawing.Size(400, 32);
+            this.inputIdPelanggan.Size = new System.Drawing.Size(400, 33);
             this.inputIdPelanggan.TabIndex = 1;
             this.inputIdPelanggan.Texts = "";
             this.inputIdPelanggan.UnderlinedStyle = false;
             this.inputIdPelanggan.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.inputIdPelanggan_KeyPress);
+            // 
+            // btnTambahkanP
+            // 
             this.btnTambahkanP.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnTambahkanP.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
+            this.btnTambahkanP.BorderColor = System.Drawing.Color.Gray;
+            this.btnTambahkanP.BorderSize = 2;
             this.btnTambahkanP.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnTambahkanP.Density = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonDensity.Default;
+            this.btnTambahkanP.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
             this.btnTambahkanP.Depth = 0;
+            this.btnTambahkanP.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnTambahkanP.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnTambahkanP.HighEmphasis = true;
             this.btnTambahkanP.Icon = null;
+            this.btnTambahkanP.IsDarkTheme = false;
             this.btnTambahkanP.Location = new System.Drawing.Point(340, 405);
             this.btnTambahkanP.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.btnTambahkanP.MouseState = MaterialSkin.MouseState.HOVER;
@@ -172,18 +207,25 @@
             this.btnTambahkanP.Size = new System.Drawing.Size(112, 36);
             this.btnTambahkanP.TabIndex = 5;
             this.btnTambahkanP.Text = "Tambahkan";
-            this.btnTambahkanP.Type = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonType.Contained;
+            this.btnTambahkanP.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
             this.btnTambahkanP.UseAccentColor = false;
             this.btnTambahkanP.UseVisualStyleBackColor = false;
             this.btnTambahkanP.Click += new System.EventHandler(this.btnTambahkanP_Click);
+            // 
+            // btnKembali
+            // 
             this.btnKembali.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnKembali.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
+            this.btnKembali.BorderColor = System.Drawing.Color.Gray;
+            this.btnKembali.BorderSize = 2;
             this.btnKembali.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnKembali.Density = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonDensity.Default;
+            this.btnKembali.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
             this.btnKembali.Depth = 0;
+            this.btnKembali.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnKembali.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnKembali.HighEmphasis = true;
             this.btnKembali.Icon = null;
+            this.btnKembali.IsDarkTheme = false;
             this.btnKembali.Location = new System.Drawing.Point(7, 405);
             this.btnKembali.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.btnKembali.MouseState = MaterialSkin.MouseState.HOVER;
@@ -192,11 +234,14 @@
             this.btnKembali.Size = new System.Drawing.Size(83, 36);
             this.btnKembali.TabIndex = 6;
             this.btnKembali.Text = "Kembali";
-            this.btnKembali.Type = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonType.Contained;
+            this.btnKembali.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
             this.btnKembali.UseAccentColor = false;
             this.btnKembali.UseVisualStyleBackColor = false;
             this.btnKembali.Click += new System.EventHandler(this.btnKembali_Click);
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            // 
+            // FormTP
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.btnKembali);

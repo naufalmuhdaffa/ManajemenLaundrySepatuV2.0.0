@@ -29,6 +29,7 @@
             // 
             // themeSwitch
             // 
+            this.themeSwitch.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.776372F);
             this.themeSwitch.Location = new System.Drawing.Point(629, 24);
             this.themeSwitch.Size = new System.Drawing.Size(170, 39);
             // 
@@ -97,7 +98,7 @@
             this.inputPassword.PlaceholderColor = System.Drawing.Color.DarkGray;
             this.inputPassword.PlaceholderText = "";
             this.inputPassword.ReadOnly = false;
-            this.inputPassword.Size = new System.Drawing.Size(400, 32);
+            this.inputPassword.Size = new System.Drawing.Size(400, 33);
             this.inputPassword.TabIndex = 2;
             this.inputPassword.Texts = "";
             this.inputPassword.UnderlinedStyle = false;
@@ -135,7 +136,7 @@
             this.inputUsername.PlaceholderColor = System.Drawing.Color.DarkGray;
             this.inputUsername.PlaceholderText = "";
             this.inputUsername.ReadOnly = false;
-            this.inputUsername.Size = new System.Drawing.Size(400, 32);
+            this.inputUsername.Size = new System.Drawing.Size(400, 33);
             this.inputUsername.TabIndex = 1;
             this.inputUsername.Texts = "";
             this.inputUsername.UnderlinedStyle = false;
@@ -204,7 +205,7 @@
             this.inputConfirmPassword.PlaceholderColor = System.Drawing.Color.DarkGray;
             this.inputConfirmPassword.PlaceholderText = "";
             this.inputConfirmPassword.ReadOnly = false;
-            this.inputConfirmPassword.Size = new System.Drawing.Size(400, 32);
+            this.inputConfirmPassword.Size = new System.Drawing.Size(400, 33);
             this.inputConfirmPassword.TabIndex = 4;
             this.inputConfirmPassword.Texts = "";
             this.inputConfirmPassword.UnderlinedStyle = false;
@@ -241,7 +242,7 @@
             // 
             // FormREG
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.btnShowPassword);

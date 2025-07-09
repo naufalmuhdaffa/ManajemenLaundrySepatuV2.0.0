@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using ManajemenLaundrySepatu.WinForms.Helpers;
 
 namespace ManajemenLaundrySepatu
 {
@@ -49,13 +50,17 @@ namespace ManajemenLaundrySepatu
         {
             foreach (Control ctl in parent.Controls)
             {
-                if (ctl is ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton ||
+                if (ctl is MyMaterialButton ||
                     ctl is MaterialSkin.Controls.MaterialLabel ||
                     ctl is MaterialSkin.Controls.MaterialSwitch ||
                     ctl is MaterialSkin.Controls.MaterialCheckbox ||
                     ctl is MaterialSkin.Controls.MaterialRadioButton ||
                     ctl is MaterialSkin.Controls.MaterialTextBox ||
-                    ctl is System.Windows.Forms.TabControl)
+                    ctl is MyComboBox ||
+                    ctl is MyTextBox ||
+                    ctl is MyDateTimePicker ||
+                    ctl is MyMaterialButton ||
+                    ctl is TabControl)
                 {
                     ctl.AutoSize = false;
                 }

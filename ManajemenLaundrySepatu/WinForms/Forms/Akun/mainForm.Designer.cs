@@ -25,20 +25,31 @@
             this.btnLewatiLogin = new ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton();
             this.chkShowPassword = new MaterialSkin.Controls.MaterialCheckbox();
             this.SuspendLayout();
-            this.themeSwitch.Location = new System.Drawing.Point(629, 24);
-            this.themeSwitch.Size = new System.Drawing.Size(170, 39);
+            // 
+            // themeSwitch
+            // 
+            this.themeSwitch.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.776372F);
+            this.themeSwitch.Location = new System.Drawing.Point(11, 87);
+            this.themeSwitch.Size = new System.Drawing.Size(117, 30);
+            // 
+            // btnLogin
+            // 
             this.btnLogin.AutoSize = false;
             this.btnLogin.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnLogin.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
+            this.btnLogin.BorderColor = System.Drawing.Color.Gray;
+            this.btnLogin.BorderSize = 2;
             this.btnLogin.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnLogin.Density = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonDensity.Default;
+            this.btnLogin.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
             this.btnLogin.Depth = 0;
             this.btnLogin.FlatAppearance.BorderColor = System.Drawing.SystemColors.ButtonFace;
             this.btnLogin.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(136)))), ((int)(((byte)(54)))), ((int)(((byte)(82)))), ((int)(((byte)(104)))));
-            this.btnLogin.Font = new System.Drawing.Font("Roboto", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.btnLogin.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnLogin.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.btnLogin.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnLogin.HighEmphasis = true;
             this.btnLogin.Icon = null;
+            this.btnLogin.IsDarkTheme = false;
             this.btnLogin.Location = new System.Drawing.Point(277, 283);
             this.btnLogin.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.btnLogin.MouseState = MaterialSkin.MouseState.HOVER;
@@ -47,10 +58,13 @@
             this.btnLogin.Size = new System.Drawing.Size(238, 47);
             this.btnLogin.TabIndex = 4;
             this.btnLogin.Text = "Login";
-            this.btnLogin.Type = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonType.Contained;
+            this.btnLogin.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
             this.btnLogin.UseAccentColor = false;
             this.btnLogin.UseVisualStyleBackColor = false;
             this.btnLogin.Click += new System.EventHandler(this.btnLogin_Click);
+            // 
+            // inputUsername
+            // 
             this.inputUsername.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.inputUsername.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.inputUsername.BorderColor = System.Drawing.Color.MediumSlateBlue;
@@ -70,12 +84,15 @@
             this.inputUsername.PlaceholderText = "Masukkan nama pengguna disini..";
             this.inputUsername.ReadOnly = false;
             this.inputUsername.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.inputUsername.Size = new System.Drawing.Size(400, 32);
+            this.inputUsername.Size = new System.Drawing.Size(400, 33);
             this.inputUsername.TabIndex = 1;
             this.inputUsername.TabStop = false;
             this.inputUsername.Texts = "";
             this.inputUsername.UnderlinedStyle = false;
             this.inputUsername.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.inputUsername_KeyPress);
+            // 
+            // labelUsername
+            // 
             this.labelUsername.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.labelUsername.Depth = 0;
             this.labelUsername.Font = new System.Drawing.Font("Roboto", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
@@ -86,6 +103,9 @@
             this.labelUsername.Size = new System.Drawing.Size(72, 19);
             this.labelUsername.TabIndex = 7;
             this.labelUsername.Text = "Username";
+            // 
+            // inputPassword
+            // 
             this.inputPassword.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.inputPassword.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.inputPassword.BorderColor = System.Drawing.Color.MediumSlateBlue;
@@ -104,12 +124,15 @@
             this.inputPassword.PlaceholderText = "Masukkan kata sandi disini..";
             this.inputPassword.ReadOnly = false;
             this.inputPassword.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.inputPassword.Size = new System.Drawing.Size(400, 32);
+            this.inputPassword.Size = new System.Drawing.Size(400, 33);
             this.inputPassword.TabIndex = 2;
             this.inputPassword.TabStop = false;
             this.inputPassword.Texts = "";
             this.inputPassword.UnderlinedStyle = false;
             this.inputPassword.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.inputPassword_KeyPress);
+            // 
+            // labelPassword
+            // 
             this.labelPassword.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.labelPassword.Depth = 0;
             this.labelPassword.Font = new System.Drawing.Font("Roboto", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
@@ -120,6 +143,9 @@
             this.labelPassword.Size = new System.Drawing.Size(71, 19);
             this.labelPassword.TabIndex = 8;
             this.labelPassword.Text = "Password";
+            // 
+            // labelAkun
+            // 
             this.labelAkun.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.labelAkun.Depth = 0;
             this.labelAkun.Font = new System.Drawing.Font("Roboto", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
@@ -130,6 +156,9 @@
             this.labelAkun.Size = new System.Drawing.Size(143, 19);
             this.labelAkun.TabIndex = 9;
             this.labelAkun.Text = "Belum Punya Akun?";
+            // 
+            // linkLabelDaftar
+            // 
             this.linkLabelDaftar.AutoSize = true;
             this.linkLabelDaftar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.linkLabelDaftar.Cursor = System.Windows.Forms.Cursors.Hand;
@@ -138,24 +167,31 @@
             this.linkLabelDaftar.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(84)))), ((int)(((byte)(126)))), ((int)(((byte)(160)))));
             this.linkLabelDaftar.Location = new System.Drawing.Point(424, 350);
             this.linkLabelDaftar.Name = "linkLabelDaftar";
-            this.linkLabelDaftar.Size = new System.Drawing.Size(91, 17);
+            this.linkLabelDaftar.Size = new System.Drawing.Size(99, 18);
             this.linkLabelDaftar.TabIndex = 5;
             this.linkLabelDaftar.TabStop = true;
             this.linkLabelDaftar.Text = "Daftar Disini !";
             this.linkLabelDaftar.VisitedLinkColor = System.Drawing.SystemColors.Highlight;
             this.linkLabelDaftar.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelDaftar_LinkClicked);
+            // 
+            // btnLewatiLogin
+            // 
             this.btnLewatiLogin.AutoSize = false;
             this.btnLewatiLogin.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnLewatiLogin.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
+            this.btnLewatiLogin.BorderColor = System.Drawing.Color.Gray;
+            this.btnLewatiLogin.BorderSize = 2;
             this.btnLewatiLogin.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnLewatiLogin.Density = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonDensity.Default;
+            this.btnLewatiLogin.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
             this.btnLewatiLogin.Depth = 0;
             this.btnLewatiLogin.FlatAppearance.BorderColor = System.Drawing.SystemColors.ButtonFace;
             this.btnLewatiLogin.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(136)))), ((int)(((byte)(54)))), ((int)(((byte)(82)))), ((int)(((byte)(104)))));
-            this.btnLewatiLogin.Font = new System.Drawing.Font("Roboto", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.btnLewatiLogin.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnLewatiLogin.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.btnLewatiLogin.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnLewatiLogin.HighEmphasis = true;
             this.btnLewatiLogin.Icon = null;
+            this.btnLewatiLogin.IsDarkTheme = false;
             this.btnLewatiLogin.Location = new System.Drawing.Point(321, 385);
             this.btnLewatiLogin.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.btnLewatiLogin.MouseState = MaterialSkin.MouseState.HOVER;
@@ -164,14 +200,17 @@
             this.btnLewatiLogin.Size = new System.Drawing.Size(147, 41);
             this.btnLewatiLogin.TabIndex = 6;
             this.btnLewatiLogin.Text = "Login Nanti";
-            this.btnLewatiLogin.Type = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonType.Contained;
+            this.btnLewatiLogin.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
             this.btnLewatiLogin.UseAccentColor = false;
             this.btnLewatiLogin.UseVisualStyleBackColor = false;
             this.btnLewatiLogin.Click += new System.EventHandler(this.btnLewatiLogin_Click);
+            // 
+            // chkShowPassword
+            // 
             this.chkShowPassword.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.chkShowPassword.Cursor = System.Windows.Forms.Cursors.Hand;
             this.chkShowPassword.Depth = 0;
-            this.chkShowPassword.Font = new System.Drawing.Font("Roboto", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.chkShowPassword.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.chkShowPassword.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.chkShowPassword.Location = new System.Drawing.Point(277, 238);
             this.chkShowPassword.Margin = new System.Windows.Forms.Padding(0);
@@ -186,7 +225,10 @@
             this.chkShowPassword.Text = "Tampilkan Password";
             this.chkShowPassword.UseVisualStyleBackColor = false;
             this.chkShowPassword.CheckedChanged += new System.EventHandler(this.chkShowPassword_CheckedChanged);
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            // 
+            // mainForm
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.chkShowPassword);

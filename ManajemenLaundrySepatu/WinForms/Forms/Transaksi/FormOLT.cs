@@ -1,4 +1,5 @@
 ﻿using ManajemenLaundrySepatu.Helpers;
+using ManajemenLaundrySepatu.WinForms.Helpers;
 using System;
 using System.Data;
 using System.Data.SqlClient;
@@ -8,7 +9,7 @@ namespace ManajemenLaundrySepatu
 {
     public partial class FormOLT : BaseForm
     {
-        private readonly string connectionString = "Data Source=LAPTOP-GIV3RJG5\\NADA;Initial Catalog=manajemenLaundrySepatu;Integrated Security=True";
+        private readonly string connectionString = DbConfig.ConnectionString;
 
         public FormOLT()
         {

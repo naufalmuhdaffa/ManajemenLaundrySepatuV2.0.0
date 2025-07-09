@@ -1,4 +1,5 @@
 ﻿using ManajemenLaundrySepatu.Helpers;
+using ManajemenLaundrySepatu.WinForms.Helpers;
 using System;
 using System.Data;
 using System.Data.SqlClient;
@@ -8,7 +9,7 @@ namespace ManajemenLaundrySepatu
 {
     public partial class FormUS : BaseForm
     {
-        private string connectionString = "Data Source=LAPTOP-GIV3RJG5\\NADA;Initial Catalog=manajemenLaundrySepatu;Integrated Security=True";
+        private string connectionString = DbConfig.ConnectionString;
         private string _origMerek, _origJenis, _origWarna, _origUkuran;
 
         public FormUS()
@@ -151,16 +152,27 @@ namespace ManajemenLaundrySepatu
                                 }
                             }
                         }
-                        catch
+                        catch (SqlException sqlEx)
                         {
                             transaction.Rollback();
-                            throw;
+                            string friendly = SqlErrorHandler.GetFriendlyErrorMessage(sqlEx);
+                            DarkModeMessageBox.Show(friendly, "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+                        catch (Exception)
+                        {
+                            transaction.Rollback();
+                            DarkModeMessageBox.Show("Terjadi kesalahan tidak terduga saat mengupdate sepatu. Silakan coba lagi atau hubungi admin.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (SqlException sqlEx)
                 {
-                    DarkModeMessageBox.Show("Error saat update: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    string friendly = SqlErrorHandler.GetFriendlyErrorMessage(sqlEx);
+                    DarkModeMessageBox.Show(friendly, "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                catch (Exception)
+                {
+                    DarkModeMessageBox.Show("Tidak dapat terhubung ke database. Silakan periksa koneksi atau hubungi admin.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }

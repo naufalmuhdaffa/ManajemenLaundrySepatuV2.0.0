@@ -157,7 +157,6 @@ namespace DarkModeForms
         private bool _IsDarkMode;
         private IntPtr originalWndProc;
         private WndProc newWndProcDelegate;
-        private IntPtr formHandle;
         private bool applyingTheme;
 
         #endregion Private Static Members

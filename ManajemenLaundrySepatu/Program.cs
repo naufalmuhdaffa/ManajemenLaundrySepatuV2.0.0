@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ManajemenLaundrySepatu.WinForms.Forms.Global;
+using System;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
@@ -16,7 +17,7 @@ namespace ManajemenLaundrySepatu
             if (LicenseManager.UsageMode != LicenseUsageMode.Designtime)
                 Application.VisualStyleState = VisualStyleState.NoneEnabled;
 
-            Application.Run(new mainForm());
+            Application.Run(new Auth());
         }
     }
 }

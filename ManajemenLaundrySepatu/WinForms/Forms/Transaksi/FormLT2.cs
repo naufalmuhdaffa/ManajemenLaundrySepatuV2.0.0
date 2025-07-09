@@ -1,4 +1,5 @@
 ﻿using ManajemenLaundrySepatu.Helpers;
+using ManajemenLaundrySepatu.WinForms.Helpers;
 using Microsoft.Reporting.WinForms;
 using System;
 using System.Data;
@@ -10,7 +11,7 @@ namespace ManajemenLaundrySepatu
 {
     public partial class FormLT2 : BaseForm
     {
-        private readonly string connectionString = "Data Source=LAPTOP-GIV3RJG5\\NADA;Initial Catalog=manajemenLaundrySepatu;Integrated Security=True";
+        private readonly string connectionString = DbConfig.ConnectionString;
 
         private DataTable currentData;
         private string cacheKey;

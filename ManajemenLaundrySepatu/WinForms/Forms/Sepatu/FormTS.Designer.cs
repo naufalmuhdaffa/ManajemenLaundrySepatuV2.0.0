@@ -30,16 +30,26 @@
             this.btnRefreshDataSepatu = new ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton();
             this.btnShowCacheSepatu = new ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton();
             this.SuspendLayout();
+            // 
+            // themeSwitch
+            // 
             this.themeSwitch.Location = new System.Drawing.Point(629, 24);
             this.themeSwitch.Size = new System.Drawing.Size(170, 39);
+            // 
+            // btnKembali
+            // 
             this.btnKembali.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnKembali.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
+            this.btnKembali.BorderColor = System.Drawing.Color.Gray;
+            this.btnKembali.BorderSize = 2;
             this.btnKembali.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnKembali.Density = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonDensity.Default;
+            this.btnKembali.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
             this.btnKembali.Depth = 0;
+            this.btnKembali.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnKembali.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnKembali.HighEmphasis = true;
             this.btnKembali.Icon = null;
+            this.btnKembali.IsDarkTheme = false;
             this.btnKembali.Location = new System.Drawing.Point(7, 405);
             this.btnKembali.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.btnKembali.MouseState = MaterialSkin.MouseState.HOVER;
@@ -48,18 +58,25 @@
             this.btnKembali.Size = new System.Drawing.Size(83, 36);
             this.btnKembali.TabIndex = 9;
             this.btnKembali.Text = "Kembali";
-            this.btnKembali.Type = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonType.Contained;
+            this.btnKembali.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
             this.btnKembali.UseAccentColor = false;
             this.btnKembali.UseVisualStyleBackColor = false;
             this.btnKembali.Click += new System.EventHandler(this.btnKembali_Click);
+            // 
+            // btnTambahkanS
+            // 
             this.btnTambahkanS.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnTambahkanS.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
+            this.btnTambahkanS.BorderColor = System.Drawing.Color.Gray;
+            this.btnTambahkanS.BorderSize = 2;
             this.btnTambahkanS.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnTambahkanS.Density = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonDensity.Default;
+            this.btnTambahkanS.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
             this.btnTambahkanS.Depth = 0;
+            this.btnTambahkanS.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnTambahkanS.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnTambahkanS.HighEmphasis = true;
             this.btnTambahkanS.Icon = null;
+            this.btnTambahkanS.IsDarkTheme = false;
             this.btnTambahkanS.Location = new System.Drawing.Point(323, 405);
             this.btnTambahkanS.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.btnTambahkanS.MouseState = MaterialSkin.MouseState.HOVER;
@@ -68,10 +85,13 @@
             this.btnTambahkanS.Size = new System.Drawing.Size(112, 36);
             this.btnTambahkanS.TabIndex = 6;
             this.btnTambahkanS.Text = "Tambahkan";
-            this.btnTambahkanS.Type = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonType.Contained;
+            this.btnTambahkanS.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
             this.btnTambahkanS.UseAccentColor = false;
             this.btnTambahkanS.UseVisualStyleBackColor = false;
             this.btnTambahkanS.Click += new System.EventHandler(this.btnTambahkanP_Click);
+            // 
+            // inputMerek
+            // 
             this.inputMerek.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.inputMerek.BorderColor = System.Drawing.Color.MediumSlateBlue;
             this.inputMerek.BorderFocusColor = System.Drawing.Color.HotPink;
@@ -93,6 +113,9 @@
             this.inputMerek.Texts = "";
             this.inputMerek.UnderlinedStyle = false;
             this.inputMerek.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.inputMerek_KeyPress);
+            // 
+            // inputJenis
+            // 
             this.inputJenis.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.inputJenis.BorderColor = System.Drawing.Color.MediumSlateBlue;
             this.inputJenis.BorderFocusColor = System.Drawing.Color.HotPink;
@@ -114,6 +137,9 @@
             this.inputJenis.Texts = "";
             this.inputJenis.UnderlinedStyle = false;
             this.inputJenis.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.inputJenis_KeyPress);
+            // 
+            // inputWarna
+            // 
             this.inputWarna.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.inputWarna.BorderColor = System.Drawing.Color.MediumSlateBlue;
             this.inputWarna.BorderFocusColor = System.Drawing.Color.HotPink;
@@ -135,6 +161,9 @@
             this.inputWarna.Texts = "";
             this.inputWarna.UnderlinedStyle = false;
             this.inputWarna.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.inputWarna_KeyPress);
+            // 
+            // labelIdPelanggan
+            // 
             this.labelIdPelanggan.AutoSize = true;
             this.labelIdPelanggan.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.labelIdPelanggan.Depth = 0;
@@ -146,6 +175,9 @@
             this.labelIdPelanggan.Size = new System.Drawing.Size(107, 19);
             this.labelIdPelanggan.TabIndex = 10;
             this.labelIdPelanggan.Text = "ID Pelanggan *";
+            // 
+            // labelMerek
+            // 
             this.labelMerek.AutoSize = true;
             this.labelMerek.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.labelMerek.Depth = 0;
@@ -157,6 +189,9 @@
             this.labelMerek.Size = new System.Drawing.Size(44, 19);
             this.labelMerek.TabIndex = 11;
             this.labelMerek.Text = "Merek";
+            // 
+            // labelJenis
+            // 
             this.labelJenis.AutoSize = true;
             this.labelJenis.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.labelJenis.Depth = 0;
@@ -168,6 +203,9 @@
             this.labelJenis.Size = new System.Drawing.Size(39, 19);
             this.labelJenis.TabIndex = 12;
             this.labelJenis.Text = "Jenis";
+            // 
+            // labelWarna
+            // 
             this.labelWarna.AutoSize = true;
             this.labelWarna.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.labelWarna.Depth = 0;
@@ -179,6 +217,9 @@
             this.labelWarna.Size = new System.Drawing.Size(47, 19);
             this.labelWarna.TabIndex = 13;
             this.labelWarna.Text = "Warna";
+            // 
+            // inputUkuran
+            // 
             this.inputUkuran.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.inputUkuran.BorderColor = System.Drawing.Color.MediumSlateBlue;
             this.inputUkuran.BorderFocusColor = System.Drawing.Color.HotPink;
@@ -200,6 +241,9 @@
             this.inputUkuran.Texts = "";
             this.inputUkuran.UnderlinedStyle = false;
             this.inputUkuran.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.inputUkuran_KeyPress);
+            // 
+            // labelUkuran
+            // 
             this.labelUkuran.AutoSize = true;
             this.labelUkuran.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.labelUkuran.Depth = 0;
@@ -211,6 +255,9 @@
             this.labelUkuran.Size = new System.Drawing.Size(51, 19);
             this.labelUkuran.TabIndex = 14;
             this.labelUkuran.Text = "Ukuran";
+            // 
+            // inputIdPelanggan
+            // 
             this.inputIdPelanggan.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.inputIdPelanggan.BorderColor = System.Drawing.Color.MediumSlateBlue;
             this.inputIdPelanggan.BorderSize = 1;
@@ -230,13 +277,20 @@
             this.inputIdPelanggan.Texts = "";
             this.inputIdPelanggan.Enter += new System.EventHandler(this.inputIdPelanggan_Enter);
             this.inputIdPelanggan.KeyDown += new System.Windows.Forms.KeyEventHandler(this.inputIdPelanggan_KeyDown);
+            // 
+            // btnRefreshDataSepatu
+            // 
             this.btnRefreshDataSepatu.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnRefreshDataSepatu.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
-            this.btnRefreshDataSepatu.Density = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonDensity.Default;
+            this.btnRefreshDataSepatu.BorderColor = System.Drawing.Color.Gray;
+            this.btnRefreshDataSepatu.BorderSize = 2;
+            this.btnRefreshDataSepatu.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
             this.btnRefreshDataSepatu.Depth = 0;
+            this.btnRefreshDataSepatu.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnRefreshDataSepatu.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnRefreshDataSepatu.HighEmphasis = true;
             this.btnRefreshDataSepatu.Icon = null;
+            this.btnRefreshDataSepatu.IsDarkTheme = false;
             this.btnRefreshDataSepatu.Location = new System.Drawing.Point(211, 405);
             this.btnRefreshDataSepatu.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.btnRefreshDataSepatu.MouseState = MaterialSkin.MouseState.HOVER;
@@ -245,17 +299,24 @@
             this.btnRefreshDataSepatu.Size = new System.Drawing.Size(84, 36);
             this.btnRefreshDataSepatu.TabIndex = 7;
             this.btnRefreshDataSepatu.Text = "Refresh";
-            this.btnRefreshDataSepatu.Type = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonType.Contained;
+            this.btnRefreshDataSepatu.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
             this.btnRefreshDataSepatu.UseAccentColor = false;
             this.btnRefreshDataSepatu.UseVisualStyleBackColor = false;
             this.btnRefreshDataSepatu.Click += new System.EventHandler(this.btnRefreshDataSepatu_Click);
+            // 
+            // btnShowCacheSepatu
+            // 
             this.btnShowCacheSepatu.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnShowCacheSepatu.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
-            this.btnShowCacheSepatu.Density = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonDensity.Default;
+            this.btnShowCacheSepatu.BorderColor = System.Drawing.Color.Gray;
+            this.btnShowCacheSepatu.BorderSize = 2;
+            this.btnShowCacheSepatu.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
             this.btnShowCacheSepatu.Depth = 0;
+            this.btnShowCacheSepatu.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnShowCacheSepatu.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnShowCacheSepatu.HighEmphasis = true;
             this.btnShowCacheSepatu.Icon = null;
+            this.btnShowCacheSepatu.IsDarkTheme = false;
             this.btnShowCacheSepatu.Location = new System.Drawing.Point(114, 405);
             this.btnShowCacheSepatu.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.btnShowCacheSepatu.MouseState = MaterialSkin.MouseState.HOVER;
@@ -264,10 +325,13 @@
             this.btnShowCacheSepatu.Size = new System.Drawing.Size(69, 36);
             this.btnShowCacheSepatu.TabIndex = 8;
             this.btnShowCacheSepatu.Text = "Cache";
-            this.btnShowCacheSepatu.Type = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonType.Contained;
+            this.btnShowCacheSepatu.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
             this.btnShowCacheSepatu.UseAccentColor = false;
             this.btnShowCacheSepatu.UseVisualStyleBackColor = false;
             this.btnShowCacheSepatu.Click += new System.EventHandler(this.btnShowCacheSepatu_Click);
+            // 
+            // FormTS
+            // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);

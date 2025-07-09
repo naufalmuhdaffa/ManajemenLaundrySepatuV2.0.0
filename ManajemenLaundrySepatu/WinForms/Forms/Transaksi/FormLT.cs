@@ -1,6 +1,7 @@
 ﻿using iTextSharp.text;
 using iTextSharp.text.pdf;
 using ManajemenLaundrySepatu.Helpers;
+using ManajemenLaundrySepatu.WinForms.Helpers;
 using System;
 using System.Data;
 using System.Data.SqlClient;
@@ -13,7 +14,7 @@ namespace ManajemenLaundrySepatu
 {
     public partial class FormLT : BaseForm
     {
-        private string connectionString = "Data Source=LAPTOP-GIV3RJG5\\NADA;Initial Catalog=manajemenLaundrySepatu;Integrated Security=True";
+        private string connectionString = DbConfig.ConnectionString;
 
         private DataTable currentData;
 

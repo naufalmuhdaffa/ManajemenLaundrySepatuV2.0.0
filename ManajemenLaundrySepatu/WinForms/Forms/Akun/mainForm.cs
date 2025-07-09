@@ -1,4 +1,5 @@
 ﻿using ManajemenLaundrySepatu.Helpers;
+using ManajemenLaundrySepatu.WinForms.Helpers;
 using MaterialSkin;
 using System;
 using System.Data;
@@ -14,12 +15,11 @@ namespace ManajemenLaundrySepatu
 {
     public partial class mainForm : BaseForm
     {
-        private string connectionString = "Data Source=LAPTOP-GIV3RJG5\\NADA;Initial Catalog=manajemenLaundrySepatu;Integrated Security=True";
+        private string connectionString = DbConfig.ConnectionString;
 
         private WelcomeTextControl welcomeControl;
 
         private Color textColor;
-        private Brush textBrush;
         private SoundPlayer soundPlayer;
 
         public mainForm()
@@ -40,7 +40,7 @@ namespace ManajemenLaundrySepatu
                 welcomeControl.SetTextColor(newColor);
             };
 
-            string audioPath = Path.Combine(Application.StartupPath, @"..\..\..\Assets\Audio\irasshaimase.wav");
+            string audioPath = Path.Combine(Application.StartupPath, @"WinForms\Resources\Audio\irasshaimase.wav");
             soundPlayer = new SoundPlayer(audioPath);
 
             chkShowPassword.AutoSize = false;

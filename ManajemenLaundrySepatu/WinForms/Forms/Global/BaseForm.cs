@@ -273,7 +273,6 @@ namespace ManajemenLaundrySepatu
                         txt.BorderFocusColor = Color.White;
                         txt.BorderSize = 1;
                         txt.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point);
-                        txt.PlaceholderColor = Color.FromArgb(255, 180, 130);
                     }
                     else if (!isDark)
                     {
@@ -283,7 +282,6 @@ namespace ManajemenLaundrySepatu
                         txt.BorderFocusColor = Color.Black;
                         txt.BorderSize = 1;
                         txt.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point);
-                        txt.PlaceholderColor = Color.FromArgb(161, 180, 255);
                     }
                 }
                 if (ctrl is MyComboBox mcb)

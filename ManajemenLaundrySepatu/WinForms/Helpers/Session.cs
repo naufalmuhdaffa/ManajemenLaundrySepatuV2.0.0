@@ -1,11 +1,12 @@
-﻿using System;
+﻿using ManajemenLaundrySepatu.WinForms.Helpers;
+using System;
 using System.Data.SqlClient;
 
 namespace ManajemenLaundrySepatu
 {
     public static class Session
     {
-        private static readonly string connectionString = "Data Source=LAPTOP-GIV3RJG5\\NADA;Initial Catalog=manajemenLaundrySepatu;Integrated Security=True";
+        private static readonly string connectionString = DbConfig.ConnectionString;
         public static int LoggedInUserId { get; set; } = 0;
         public static string LoggedInUsername { get; set; } = null;
         public static bool IsGuest { get; set; } = false;
