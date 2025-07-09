@@ -33,8 +33,9 @@
             // 
             // themeSwitch
             // 
-            this.themeSwitch.Location = new System.Drawing.Point(629, 24);
-            this.themeSwitch.Size = new System.Drawing.Size(170, 39);
+            this.themeSwitch.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.776372F);
+            this.themeSwitch.Location = new System.Drawing.Point(632, 25);
+            this.themeSwitch.Size = new System.Drawing.Size(167, 38);
             // 
             // btnKembali
             // 
@@ -108,7 +109,7 @@
             this.inputMerek.PlaceholderColor = System.Drawing.Color.DarkGray;
             this.inputMerek.PlaceholderText = "";
             this.inputMerek.ReadOnly = false;
-            this.inputMerek.Size = new System.Drawing.Size(400, 32);
+            this.inputMerek.Size = new System.Drawing.Size(400, 33);
             this.inputMerek.TabIndex = 2;
             this.inputMerek.Texts = "";
             this.inputMerek.UnderlinedStyle = false;
@@ -132,7 +133,7 @@
             this.inputJenis.PlaceholderColor = System.Drawing.Color.DarkGray;
             this.inputJenis.PlaceholderText = "";
             this.inputJenis.ReadOnly = false;
-            this.inputJenis.Size = new System.Drawing.Size(400, 32);
+            this.inputJenis.Size = new System.Drawing.Size(400, 33);
             this.inputJenis.TabIndex = 3;
             this.inputJenis.Texts = "";
             this.inputJenis.UnderlinedStyle = false;
@@ -156,7 +157,7 @@
             this.inputWarna.PlaceholderColor = System.Drawing.Color.DarkGray;
             this.inputWarna.PlaceholderText = "";
             this.inputWarna.ReadOnly = false;
-            this.inputWarna.Size = new System.Drawing.Size(400, 32);
+            this.inputWarna.Size = new System.Drawing.Size(400, 33);
             this.inputWarna.TabIndex = 4;
             this.inputWarna.Texts = "";
             this.inputWarna.UnderlinedStyle = false;
@@ -236,7 +237,7 @@
             this.inputUkuran.PlaceholderColor = System.Drawing.Color.DarkGray;
             this.inputUkuran.PlaceholderText = "";
             this.inputUkuran.ReadOnly = false;
-            this.inputUkuran.Size = new System.Drawing.Size(400, 32);
+            this.inputUkuran.Size = new System.Drawing.Size(400, 33);
             this.inputUkuran.TabIndex = 5;
             this.inputUkuran.Texts = "";
             this.inputUkuran.UnderlinedStyle = false;
@@ -332,7 +333,7 @@
             // 
             // FormTS
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.btnShowCacheSepatu);

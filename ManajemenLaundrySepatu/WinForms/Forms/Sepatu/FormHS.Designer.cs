@@ -27,8 +27,8 @@
             // themeSwitch
             // 
             this.themeSwitch.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.776372F);
-            this.themeSwitch.Location = new System.Drawing.Point(11, 87);
-            this.themeSwitch.Size = new System.Drawing.Size(117, 30);
+            this.themeSwitch.Location = new System.Drawing.Point(632, 25);
+            this.themeSwitch.Size = new System.Drawing.Size(167, 38);
             // 
             // btnHapus
             // 

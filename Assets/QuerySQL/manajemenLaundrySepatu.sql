@@ -464,11 +464,11 @@ DBCC CHECKIDENT ('Maintenance_Alat_Laundry');
 DBCC CHECKIDENT ('Akun');
 
   -- Atur Ulang Nilai Identity --
-DBCC CHECKIDENT ('Sepatu', RESEED, 0);
-DBCC CHECKIDENT ('Transaksi', RESEED, 0);
-DBCC CHECKIDENT ('Barang_Konsumsi', RESEED, 0);
-DBCC CHECKIDENT ('Maintenance_Alat_Laundry', RESEED, 0);
-DBCC CHECKIDENT ('Akun', RESEED, 0);
+DBCC CHECKIDENT ('Sepatu', RESEED, 1);
+DBCC CHECKIDENT ('Transaksi', RESEED, 1);
+DBCC CHECKIDENT ('Barang_Konsumsi', RESEED, 1);
+DBCC CHECKIDENT ('Maintenance_Alat_Laundry', RESEED, 1);
+DBCC CHECKIDENT ('Akun', RESEED, 1);
 
 
 					--===================--
@@ -702,7 +702,7 @@ END
 
 -- 3. UPDATE: Ubah Data Pelanggan
 CREATE PROCEDURE sp_UpdatePelanggan
-    @id_pelanggan CHAR(3),
+    @id_pelanggan CHAR(4),
     @nama VARCHAR(100),
     @no_hp VARCHAR(13),
     @alamat VARCHAR(100),
@@ -734,7 +734,7 @@ END
 
 -- 4. DELETE: Hapus Pelanggan
 CREATE PROCEDURE sp_DeletePelanggan
-    @id_pelanggan CHAR(3),
+    @id_pelanggan CHAR(4),
     @id_akun INT
 AS
 BEGIN
@@ -763,7 +763,7 @@ END
  
   -- Tambah
 CREATE PROCEDURE sp_CreateSepatu
-    @id_pelanggan CHAR(3),
+    @id_pelanggan CHAR(4),
     @merek VARCHAR(100),
     @jenis VARCHAR(50),
     @warna VARCHAR(50),
@@ -815,7 +815,7 @@ END
   -- Update
 CREATE PROCEDURE sp_UpdateSepatu
     @id_sepatu INT,
-    @id_pelanggan CHAR(3),
+    @id_pelanggan CHAR(4),
     @merek VARCHAR(100),
     @jenis VARCHAR(50),
     @warna VARCHAR(50),
@@ -878,7 +878,7 @@ END
 
   -- Tambah
 CREATE PROCEDURE sp_CreateTransaksi
-    @id_pelanggan CHAR(3),
+    @id_pelanggan CHAR(4),
     @id_sepatu INT,
     @total_harga DECIMAL(10,2),
     @status_transaksi VARCHAR(10),
@@ -928,7 +928,7 @@ END
   -- Update
 CREATE PROCEDURE sp_UpdateTransaksi
     @id_transaksi INT,
-    @id_pelanggan CHAR(3),
+    @id_pelanggan CHAR(4),
     @id_sepatu INT,
     @total_harga DECIMAL(10,2),
     @status_transaksi VARCHAR(10),
@@ -7397,7 +7397,3 @@ INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi,
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-03-04', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-09-25', 'Pembersihan mendalam', 1);       
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-06-06', 'Perawatan rutin', 1);
-
-
-
-SELECT name FROM sys.databases

@@ -23,16 +23,27 @@
             this.inputSearchTransaksi = new ManajemenLaundrySepatu.MyTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.dgvTransaksi)).BeginInit();
             this.SuspendLayout();
-            this.themeSwitch.Location = new System.Drawing.Point(629, 24);
-            this.themeSwitch.Size = new System.Drawing.Size(170, 39);
+            // 
+            // themeSwitch
+            // 
+            this.themeSwitch.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.776372F);
+            this.themeSwitch.Location = new System.Drawing.Point(632, 25);
+            this.themeSwitch.Size = new System.Drawing.Size(167, 38);
+            // 
+            // btnHapus
+            // 
             this.btnHapus.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnHapus.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
+            this.btnHapus.BorderColor = System.Drawing.Color.Gray;
+            this.btnHapus.BorderSize = 2;
             this.btnHapus.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnHapus.Density = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonDensity.Default;
+            this.btnHapus.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
             this.btnHapus.Depth = 0;
+            this.btnHapus.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnHapus.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnHapus.HighEmphasis = true;
             this.btnHapus.Icon = null;
+            this.btnHapus.IsDarkTheme = false;
             this.btnHapus.Location = new System.Drawing.Point(373, 405);
             this.btnHapus.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.btnHapus.MouseState = MaterialSkin.MouseState.HOVER;
@@ -41,18 +52,25 @@
             this.btnHapus.Size = new System.Drawing.Size(69, 36);
             this.btnHapus.TabIndex = 3;
             this.btnHapus.Text = "Hapus";
-            this.btnHapus.Type = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonType.Contained;
+            this.btnHapus.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
             this.btnHapus.UseAccentColor = false;
             this.btnHapus.UseVisualStyleBackColor = false;
             this.btnHapus.Click += new System.EventHandler(this.btnHapus_Click);
+            // 
+            // btnKembali
+            // 
             this.btnKembali.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnKembali.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
+            this.btnKembali.BorderColor = System.Drawing.Color.Gray;
+            this.btnKembali.BorderSize = 2;
             this.btnKembali.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnKembali.Density = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonDensity.Default;
+            this.btnKembali.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
             this.btnKembali.Depth = 0;
+            this.btnKembali.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnKembali.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnKembali.HighEmphasis = true;
             this.btnKembali.Icon = null;
+            this.btnKembali.IsDarkTheme = false;
             this.btnKembali.Location = new System.Drawing.Point(7, 405);
             this.btnKembali.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.btnKembali.MouseState = MaterialSkin.MouseState.HOVER;
@@ -61,10 +79,13 @@
             this.btnKembali.Size = new System.Drawing.Size(83, 36);
             this.btnKembali.TabIndex = 6;
             this.btnKembali.Text = "Kembali";
-            this.btnKembali.Type = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonType.Contained;
+            this.btnKembali.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
             this.btnKembali.UseAccentColor = false;
             this.btnKembali.UseVisualStyleBackColor = false;
             this.btnKembali.Click += new System.EventHandler(this.btnKembali_Click);
+            // 
+            // dgvTransaksi
+            // 
             this.dgvTransaksi.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvTransaksi.Font = new System.Drawing.Font("Roboto", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.dgvTransaksi.Location = new System.Drawing.Point(7, 110);
@@ -73,13 +94,20 @@
             this.dgvTransaksi.RowTemplate.Height = 28;
             this.dgvTransaksi.Size = new System.Drawing.Size(787, 286);
             this.dgvTransaksi.TabIndex = 2;
+            // 
+            // btnRefreshDataTransaksi
+            // 
             this.btnRefreshDataTransaksi.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnRefreshDataTransaksi.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
-            this.btnRefreshDataTransaksi.Density = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonDensity.Default;
+            this.btnRefreshDataTransaksi.BorderColor = System.Drawing.Color.Gray;
+            this.btnRefreshDataTransaksi.BorderSize = 2;
+            this.btnRefreshDataTransaksi.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
             this.btnRefreshDataTransaksi.Depth = 0;
+            this.btnRefreshDataTransaksi.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnRefreshDataTransaksi.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnRefreshDataTransaksi.HighEmphasis = true;
             this.btnRefreshDataTransaksi.Icon = null;
+            this.btnRefreshDataTransaksi.IsDarkTheme = false;
             this.btnRefreshDataTransaksi.Location = new System.Drawing.Point(241, 405);
             this.btnRefreshDataTransaksi.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.btnRefreshDataTransaksi.MouseState = MaterialSkin.MouseState.HOVER;
@@ -88,17 +116,24 @@
             this.btnRefreshDataTransaksi.Size = new System.Drawing.Size(84, 36);
             this.btnRefreshDataTransaksi.TabIndex = 4;
             this.btnRefreshDataTransaksi.Text = "Refresh";
-            this.btnRefreshDataTransaksi.Type = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonType.Contained;
+            this.btnRefreshDataTransaksi.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
             this.btnRefreshDataTransaksi.UseAccentColor = false;
             this.btnRefreshDataTransaksi.UseVisualStyleBackColor = false;
             this.btnRefreshDataTransaksi.Click += new System.EventHandler(this.btnRefreshDataTransaksi_Click);
+            // 
+            // btnShowCacheTransaksi
+            // 
             this.btnShowCacheTransaksi.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnShowCacheTransaksi.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
-            this.btnShowCacheTransaksi.Density = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonDensity.Default;
+            this.btnShowCacheTransaksi.BorderColor = System.Drawing.Color.Gray;
+            this.btnShowCacheTransaksi.BorderSize = 2;
+            this.btnShowCacheTransaksi.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
             this.btnShowCacheTransaksi.Depth = 0;
+            this.btnShowCacheTransaksi.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnShowCacheTransaksi.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnShowCacheTransaksi.HighEmphasis = true;
             this.btnShowCacheTransaksi.Icon = null;
+            this.btnShowCacheTransaksi.IsDarkTheme = false;
             this.btnShowCacheTransaksi.Location = new System.Drawing.Point(134, 405);
             this.btnShowCacheTransaksi.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.btnShowCacheTransaksi.MouseState = MaterialSkin.MouseState.HOVER;
@@ -107,10 +142,13 @@
             this.btnShowCacheTransaksi.Size = new System.Drawing.Size(69, 36);
             this.btnShowCacheTransaksi.TabIndex = 5;
             this.btnShowCacheTransaksi.Text = "Cache";
-            this.btnShowCacheTransaksi.Type = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonType.Contained;
+            this.btnShowCacheTransaksi.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
             this.btnShowCacheTransaksi.UseAccentColor = false;
             this.btnShowCacheTransaksi.UseVisualStyleBackColor = false;
             this.btnShowCacheTransaksi.Click += new System.EventHandler(this.btnShowCacheTransaksi_Click);
+            // 
+            // inputSearchTransaksi
+            // 
             this.inputSearchTransaksi.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
             this.inputSearchTransaksi.BorderColor = System.Drawing.Color.MediumSlateBlue;
             this.inputSearchTransaksi.BorderFocusColor = System.Drawing.Color.HotPink;
@@ -127,11 +165,14 @@
             this.inputSearchTransaksi.PlaceholderColor = System.Drawing.Color.DarkGray;
             this.inputSearchTransaksi.PlaceholderText = "Ketik untuk cari transaksi…";
             this.inputSearchTransaksi.ReadOnly = false;
-            this.inputSearchTransaksi.Size = new System.Drawing.Size(786, 32);
+            this.inputSearchTransaksi.Size = new System.Drawing.Size(786, 33);
             this.inputSearchTransaksi.TabIndex = 1;
             this.inputSearchTransaksi.Texts = "";
             this.inputSearchTransaksi.UnderlinedStyle = false;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            // 
+            // FormHT
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.inputSearchTransaksi);

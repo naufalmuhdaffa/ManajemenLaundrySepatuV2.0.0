@@ -137,7 +137,8 @@ namespace ManajemenLaundrySepatu
             themeSwitch = new MaterialSwitch
             {
                 Text = "Dark Mode",
-                Location = new Point(10, 70),
+                Location = new Point(562, 20),
+                Size = new Size(149, 31),
                 Checked = skinManager.Theme == MaterialSkinManager.Themes.DARK
             };
             themeSwitch.CheckedChanged += ThemeSwitch_CheckedChanged;

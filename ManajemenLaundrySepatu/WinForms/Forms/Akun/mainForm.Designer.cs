@@ -24,13 +24,14 @@
             this.linkLabelDaftar = new System.Windows.Forms.LinkLabel();
             this.btnLewatiLogin = new ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton();
             this.chkShowPassword = new MaterialSkin.Controls.MaterialCheckbox();
+            this.btnBackAuth = new ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton();
             this.SuspendLayout();
             // 
             // themeSwitch
             // 
             this.themeSwitch.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.776372F);
-            this.themeSwitch.Location = new System.Drawing.Point(11, 87);
-            this.themeSwitch.Size = new System.Drawing.Size(117, 30);
+            this.themeSwitch.Location = new System.Drawing.Point(632, 25);
+            this.themeSwitch.Size = new System.Drawing.Size(167, 38);
             // 
             // btnLogin
             // 
@@ -226,11 +227,43 @@
             this.chkShowPassword.UseVisualStyleBackColor = false;
             this.chkShowPassword.CheckedChanged += new System.EventHandler(this.chkShowPassword_CheckedChanged);
             // 
+            // btnBackAuth
+            // 
+            this.btnBackAuth.AutoSize = false;
+            this.btnBackAuth.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnBackAuth.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
+            this.btnBackAuth.BorderColor = System.Drawing.Color.Gray;
+            this.btnBackAuth.BorderSize = 2;
+            this.btnBackAuth.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnBackAuth.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
+            this.btnBackAuth.Depth = 0;
+            this.btnBackAuth.FlatAppearance.BorderColor = System.Drawing.SystemColors.ButtonFace;
+            this.btnBackAuth.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(136)))), ((int)(((byte)(54)))), ((int)(((byte)(82)))), ((int)(((byte)(104)))));
+            this.btnBackAuth.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnBackAuth.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.btnBackAuth.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.btnBackAuth.HighEmphasis = true;
+            this.btnBackAuth.Icon = null;
+            this.btnBackAuth.IsDarkTheme = false;
+            this.btnBackAuth.Location = new System.Drawing.Point(7, 401);
+            this.btnBackAuth.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
+            this.btnBackAuth.MouseState = MaterialSkin.MouseState.HOVER;
+            this.btnBackAuth.Name = "btnBackAuth";
+            this.btnBackAuth.NoAccentTextColor = System.Drawing.Color.Empty;
+            this.btnBackAuth.Size = new System.Drawing.Size(147, 41);
+            this.btnBackAuth.TabIndex = 10;
+            this.btnBackAuth.Text = "Kembali ke Auth";
+            this.btnBackAuth.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
+            this.btnBackAuth.UseAccentColor = false;
+            this.btnBackAuth.UseVisualStyleBackColor = false;
+            this.btnBackAuth.Click += new System.EventHandler(this.btnBackAuth_Clicked);
+            // 
             // mainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.btnBackAuth);
             this.Controls.Add(this.chkShowPassword);
             this.Controls.Add(this.btnLewatiLogin);
             this.Controls.Add(this.linkLabelDaftar);
@@ -255,6 +288,7 @@
             this.Controls.SetChildIndex(this.btnLewatiLogin, 0);
             this.Controls.SetChildIndex(this.chkShowPassword, 0);
             this.Controls.SetChildIndex(this.themeSwitch, 0);
+            this.Controls.SetChildIndex(this.btnBackAuth, 0);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -271,6 +305,7 @@
         private System.Windows.Forms.LinkLabel linkLabelDaftar;
         private ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton btnLewatiLogin;
         private MaterialSkin.Controls.MaterialCheckbox chkShowPassword;
+        private WinForms.Helpers.MyMaterialButton btnBackAuth;
     }
 }
 

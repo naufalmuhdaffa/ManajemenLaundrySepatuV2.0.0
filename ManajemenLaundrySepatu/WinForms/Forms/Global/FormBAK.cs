@@ -14,7 +14,10 @@ namespace ManajemenLaundrySepatu
 {
     public partial class FormBAK : BaseForm
     {
-        private readonly string masterConnection = DbConfig.ConnectionString;
+        private readonly string masterConnection = DbConfig.ConnectionString.Replace(
+            new SqlConnectionStringBuilder(DbConfig.ConnectionString).InitialCatalog,
+            "master"
+        );
         private readonly string connectionString = DbConfig.ConnectionString;
         private const string backupProcedure = "sp_BackupDatabase";
         private const string restoreProcedure = "sp_RestoreDatabase";

@@ -35,6 +35,10 @@ namespace ManajemenLaundrySepatu.WinForms.Helpers
                 "Format No HP tidak valid. Harus diawali '08' dan panjang 10–13 digit."
             },
             {
+                "check_alamat",
+                "Alamat hanya boleh berisi huruf alfabet, spasi, koma (,) dan tanda hubung (-)."
+            },
+            {
                 "FK__Pelanggan__id_ak__7E02B4CC",
                 "Session pengguna tidak valid. Silakan login ulang."
             },

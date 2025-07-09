@@ -161,6 +161,7 @@
     <Compile Include="WinForms\Helpers\MyMaterialButton.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="WinForms\Helpers\PathHelperBAK.cs" />
     <Compile Include="WinForms\Helpers\SqlErrorHandler.cs" />
     <Compile Include="WinForms\Views\DataSetLT.Designer.cs">
       <AutoGen>True</AutoGen>

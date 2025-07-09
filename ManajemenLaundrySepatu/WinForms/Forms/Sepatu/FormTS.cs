@@ -67,17 +67,28 @@ namespace ManajemenLaundrySepatu
 
                         using (SqlDataReader reader = cmd.ExecuteReader())
                         {
-                            Dictionary<string, string> sepatuDict = new Dictionary<string, string>();
+                            Dictionary<string, string> pelangganDict = new Dictionary<string, string>();
                             while (reader.Read())
                             {
                                 string id = reader["ID Pelanggan"].ToString();
                                 string nama = reader["Nama"].ToString();
-                                sepatuDict[id] = $"{id} - {nama}";
+                                pelangganDict[id] = $"{id} - {nama}";
                             }
 
-                            Cache.SetCache(cacheKey, sepatuDict, 300);
+                            Cache.SetCache(cacheKey, pelangganDict, 300);
 
-                            inputIdPelanggan.DataSource = new BindingSource(sepatuDict, null);
+                            if (pelangganDict.Count == 0)
+                            {
+                                DarkModeMessageBox.Show(
+                                    "Belum ada data pelanggan yang tersedia.\nSilakan tambahkan pelanggan terlebih dahulu.",
+                                    "Informasi",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Information
+                                );
+                                pelangganDict.Add("", "-- Belum ada pelanggan --");
+                            }
+
+                            inputIdPelanggan.DataSource = new BindingSource(pelangganDict, null);
                             inputIdPelanggan.DisplayMember = "Value";
                             inputIdPelanggan.ValueMember = "Key";
                         }

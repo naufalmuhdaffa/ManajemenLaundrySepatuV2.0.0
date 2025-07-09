@@ -20,16 +20,27 @@
             this.btnKembali = new ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton();
             this.btnTS = new ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton();
             this.SuspendLayout();
-            this.themeSwitch.Location = new System.Drawing.Point(629, 24);
-            this.themeSwitch.Size = new System.Drawing.Size(170, 39);
+            // 
+            // themeSwitch
+            // 
+            this.themeSwitch.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.776372F);
+            this.themeSwitch.Location = new System.Drawing.Point(632, 25);
+            this.themeSwitch.Size = new System.Drawing.Size(167, 38);
+            // 
+            // btnHS
+            // 
             this.btnHS.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnHS.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
+            this.btnHS.BorderColor = System.Drawing.Color.Gray;
+            this.btnHS.BorderSize = 2;
             this.btnHS.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnHS.Density = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonDensity.Default;
+            this.btnHS.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
             this.btnHS.Depth = 0;
+            this.btnHS.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnHS.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnHS.HighEmphasis = true;
             this.btnHS.Icon = null;
+            this.btnHS.IsDarkTheme = false;
             this.btnHS.Location = new System.Drawing.Point(7, 223);
             this.btnHS.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.btnHS.MouseState = MaterialSkin.MouseState.HOVER;
@@ -38,18 +49,25 @@
             this.btnHS.Size = new System.Drawing.Size(183, 36);
             this.btnHS.TabIndex = 3;
             this.btnHS.Text = "Lihat / Hapus Sepatu";
-            this.btnHS.Type = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonType.Contained;
+            this.btnHS.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
             this.btnHS.UseAccentColor = false;
             this.btnHS.UseVisualStyleBackColor = false;
             this.btnHS.Click += new System.EventHandler(this.btnHS_Click);
+            // 
+            // btnLS
+            // 
             this.btnLS.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnLS.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
+            this.btnLS.BorderColor = System.Drawing.Color.Gray;
+            this.btnLS.BorderSize = 2;
             this.btnLS.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnLS.Density = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonDensity.Default;
+            this.btnLS.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
             this.btnLS.Depth = 0;
+            this.btnLS.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnLS.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnLS.HighEmphasis = true;
             this.btnLS.Icon = null;
+            this.btnLS.IsDarkTheme = false;
             this.btnLS.Location = new System.Drawing.Point(7, 143);
             this.btnLS.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.btnLS.MouseState = MaterialSkin.MouseState.HOVER;
@@ -58,18 +76,25 @@
             this.btnLS.Size = new System.Drawing.Size(190, 36);
             this.btnLS.TabIndex = 2;
             this.btnLS.Text = "Lihat / Update Sepatu";
-            this.btnLS.Type = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonType.Contained;
+            this.btnLS.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
             this.btnLS.UseAccentColor = false;
             this.btnLS.UseVisualStyleBackColor = false;
             this.btnLS.Click += new System.EventHandler(this.btnUS_Click);
+            // 
+            // btnKembali
+            // 
             this.btnKembali.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnKembali.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
+            this.btnKembali.BorderColor = System.Drawing.Color.Gray;
+            this.btnKembali.BorderSize = 2;
             this.btnKembali.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnKembali.Density = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonDensity.Default;
+            this.btnKembali.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
             this.btnKembali.Depth = 0;
+            this.btnKembali.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnKembali.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnKembali.HighEmphasis = true;
             this.btnKembali.Icon = null;
+            this.btnKembali.IsDarkTheme = false;
             this.btnKembali.Location = new System.Drawing.Point(7, 405);
             this.btnKembali.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.btnKembali.MouseState = MaterialSkin.MouseState.HOVER;
@@ -78,18 +103,25 @@
             this.btnKembali.Size = new System.Drawing.Size(83, 36);
             this.btnKembali.TabIndex = 4;
             this.btnKembali.Text = "Kembali";
-            this.btnKembali.Type = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonType.Contained;
+            this.btnKembali.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
             this.btnKembali.UseAccentColor = false;
             this.btnKembali.UseVisualStyleBackColor = false;
             this.btnKembali.Click += new System.EventHandler(this.btnKembali_Click);
+            // 
+            // btnTS
+            // 
             this.btnTS.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnTS.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
+            this.btnTS.BorderColor = System.Drawing.Color.Gray;
+            this.btnTS.BorderSize = 2;
             this.btnTS.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnTS.Density = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonDensity.Default;
+            this.btnTS.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
             this.btnTS.Depth = 0;
+            this.btnTS.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnTS.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.btnTS.HighEmphasis = true;
             this.btnTS.Icon = null;
+            this.btnTS.IsDarkTheme = false;
             this.btnTS.Location = new System.Drawing.Point(7, 70);
             this.btnTS.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.btnTS.MouseState = MaterialSkin.MouseState.HOVER;
@@ -98,11 +130,14 @@
             this.btnTS.Size = new System.Drawing.Size(141, 36);
             this.btnTS.TabIndex = 1;
             this.btnTS.Text = "Tambah Sepatu";
-            this.btnTS.Type = ManajemenLaundrySepatu.WinForms.Helpers.MyMaterialButton.MaterialButtonType.Contained;
+            this.btnTS.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Contained;
             this.btnTS.UseAccentColor = false;
             this.btnTS.UseVisualStyleBackColor = false;
             this.btnTS.Click += new System.EventHandler(this.btnTS_Click);
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            // 
+            // FormKDS
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.btnHS);

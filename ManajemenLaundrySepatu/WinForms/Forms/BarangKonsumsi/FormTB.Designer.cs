@@ -27,8 +27,9 @@
             // 
             // themeSwitch
             // 
-            this.themeSwitch.Location = new System.Drawing.Point(629, 24);
-            this.themeSwitch.Size = new System.Drawing.Size(170, 39);
+            this.themeSwitch.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.776372F);
+            this.themeSwitch.Location = new System.Drawing.Point(632, 25);
+            this.themeSwitch.Size = new System.Drawing.Size(167, 38);
             // 
             // btnKembali
             // 
@@ -102,7 +103,7 @@
             this.inputNamaBarang.PlaceholderColor = System.Drawing.Color.DarkGray;
             this.inputNamaBarang.PlaceholderText = "";
             this.inputNamaBarang.ReadOnly = false;
-            this.inputNamaBarang.Size = new System.Drawing.Size(400, 32);
+            this.inputNamaBarang.Size = new System.Drawing.Size(400, 33);
             this.inputNamaBarang.TabIndex = 1;
             this.inputNamaBarang.Texts = "";
             this.inputNamaBarang.UnderlinedStyle = false;
@@ -126,7 +127,7 @@
             this.inputJumlah.PlaceholderColor = System.Drawing.Color.DarkGray;
             this.inputJumlah.PlaceholderText = "";
             this.inputJumlah.ReadOnly = false;
-            this.inputJumlah.Size = new System.Drawing.Size(400, 32);
+            this.inputJumlah.Size = new System.Drawing.Size(400, 33);
             this.inputJumlah.TabIndex = 2;
             this.inputJumlah.Texts = "";
             this.inputJumlah.UnderlinedStyle = false;
@@ -150,7 +151,7 @@
             this.inputSatuan.PlaceholderColor = System.Drawing.Color.DarkGray;
             this.inputSatuan.PlaceholderText = "";
             this.inputSatuan.ReadOnly = false;
-            this.inputSatuan.Size = new System.Drawing.Size(400, 32);
+            this.inputSatuan.Size = new System.Drawing.Size(400, 33);
             this.inputSatuan.TabIndex = 3;
             this.inputSatuan.Texts = "";
             this.inputSatuan.UnderlinedStyle = false;
@@ -200,7 +201,7 @@
             // 
             // FormTB
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.btnKembali);

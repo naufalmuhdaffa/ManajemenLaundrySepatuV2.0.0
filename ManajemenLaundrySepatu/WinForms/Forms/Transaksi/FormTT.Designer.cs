@@ -31,8 +31,9 @@
             // 
             // themeSwitch
             // 
-            this.themeSwitch.Location = new System.Drawing.Point(629, 24);
-            this.themeSwitch.Size = new System.Drawing.Size(170, 39);
+            this.themeSwitch.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.776372F);
+            this.themeSwitch.Location = new System.Drawing.Point(632, 25);
+            this.themeSwitch.Size = new System.Drawing.Size(167, 38);
             // 
             // btnKembali
             // 
@@ -48,7 +49,7 @@
             this.btnKembali.HighEmphasis = true;
             this.btnKembali.Icon = null;
             this.btnKembali.IsDarkTheme = false;
-            this.btnKembali.Location = new System.Drawing.Point(7, 405);
+            this.btnKembali.Location = new System.Drawing.Point(7, 384);
             this.btnKembali.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.btnKembali.MouseState = MaterialSkin.MouseState.HOVER;
             this.btnKembali.Name = "btnKembali";
@@ -106,7 +107,7 @@
             this.inputTotalHarga.PlaceholderColor = System.Drawing.Color.DarkGray;
             this.inputTotalHarga.PlaceholderText = "";
             this.inputTotalHarga.ReadOnly = false;
-            this.inputTotalHarga.Size = new System.Drawing.Size(400, 32);
+            this.inputTotalHarga.Size = new System.Drawing.Size(400, 33);
             this.inputTotalHarga.TabIndex = 3;
             this.inputTotalHarga.Texts = "";
             this.inputTotalHarga.UnderlinedStyle = false;
@@ -288,7 +289,7 @@
             // 
             // FormTT
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.btnShowCacheTransaksi);

@@ -80,11 +80,23 @@ namespace ManajemenLaundrySepatu
                                     pelangganDict[id] = $"{id} - {nama}";
                                 }
 
+                                Cache.SetCache(cachePelangganKey, pelangganDict, 300);
+
+                                if (pelangganDict.Count == 0)
+                                {
+                                    DarkModeMessageBox.Show(
+                                        "Belum ada data pelanggan yang tersedia.\nSilakan tambahkan pelanggan terlebih dahulu.",
+                                        "Informasi",
+                                        MessageBoxButtons.OK,
+                                        MessageBoxIcon.Information
+                                    );
+                                    pelangganDict.Add("", "-- Belum ada pelanggan --");
+                                }
+
                                 inputIdPelanggan.DataSource = new BindingSource(pelangganDict, null);
                                 inputIdPelanggan.DisplayMember = "Value";
                                 inputIdPelanggan.ValueMember = "Key";
 
-                                Cache.SetCache(cachePelangganKey, pelangganDict, 300);
                             }
                         }
                     }
@@ -129,11 +141,23 @@ namespace ManajemenLaundrySepatu
                                 sepatuDict[id] = $"{id} - {merek}";
                             }
 
+                            Cache.SetCache(cacheSepatuKey, sepatuDict, 300);
+
+                            if (sepatuDict.Count == 0)
+                            {
+                                DarkModeMessageBox.Show(
+                                    "Belum ada data sepatu yang tersedia.\nSilakan tambahkan sepatu terlebih dahulu.",
+                                    "Informasi",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Information
+                                );
+                                sepatuDict.Add(0, "-- Belum ada sepatu --");
+                            }
+
                             inputIdSepatu.DataSource = new BindingSource(sepatuDict, null);
                             inputIdSepatu.DisplayMember = "Value";
                             inputIdSepatu.ValueMember = "Key";
 
-                            Cache.SetCache(cacheSepatuKey, sepatuDict, 300);
                         }
                     }
                 }

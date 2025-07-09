@@ -1,4 +1,5 @@
 ﻿using ManajemenLaundrySepatu.Helpers;
+using ManajemenLaundrySepatu.WinForms.Forms.Global;
 using ManajemenLaundrySepatu.WinForms.Helpers;
 using MaterialSkin;
 using System;
@@ -249,6 +250,17 @@ namespace ManajemenLaundrySepatu
                 Form.WindowState = FormWindowState.Maximized;
         }
 
+        private void btnBackAuth_Clicked(object sender, EventArgs e)
+        {
+            this.Hide();
+            Auth Form = new Auth();
+            Form.Show();
+            Form.EnableAutoResize();
+            Form.WindowState = FormWindowState.Normal;
+            if (this.WindowState == FormWindowState.Maximized)
+                Form.WindowState = FormWindowState.Maximized;
+        }
+
         public static string HashPassword(string password)
         {
             using (SHA256 sha256 = SHA256.Create())
@@ -357,6 +369,8 @@ namespace ManajemenLaundrySepatu
             linkLabelDaftar.Visible = false;
             btnLewatiLogin.Visible = false;
             chkShowPassword.Visible = false;
+            themeSwitch.Visible = false;
+            btnBackAuth.Visible = false;
         }
     }
 }

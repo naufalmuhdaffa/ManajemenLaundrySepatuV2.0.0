@@ -40,13 +40,14 @@
             this.labelServerManual = new MaterialSkin.Controls.MaterialLabel();
             this.labelDatabaseManual = new MaterialSkin.Controls.MaterialLabel();
             this.txtDatabaseManual = new ManajemenLaundrySepatu.MyTextBox();
+            this.materialLabel2 = new MaterialSkin.Controls.MaterialLabel();
             this.SuspendLayout();
             // 
             // themeSwitch
             // 
             this.themeSwitch.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.776372F);
-            this.themeSwitch.Location = new System.Drawing.Point(629, 24);
-            this.themeSwitch.Size = new System.Drawing.Size(170, 39);
+            this.themeSwitch.Location = new System.Drawing.Point(632, 25);
+            this.themeSwitch.Size = new System.Drawing.Size(167, 38);
             // 
             // cmbServer
             // 
@@ -212,7 +213,7 @@
             this.materialLabel1.Depth = 0;
             this.materialLabel1.Font = new System.Drawing.Font("Roboto", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.materialLabel1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-            this.materialLabel1.Location = new System.Drawing.Point(252, 281);
+            this.materialLabel1.Location = new System.Drawing.Point(264, 281);
             this.materialLabel1.MouseState = MaterialSkin.MouseState.HOVER;
             this.materialLabel1.Name = "materialLabel1";
             this.materialLabel1.Size = new System.Drawing.Size(273, 19);
@@ -270,11 +271,26 @@
             this.txtDatabaseManual.Texts = "";
             this.txtDatabaseManual.UnderlinedStyle = false;
             // 
+            // materialLabel2
+            // 
+            this.materialLabel2.AutoSize = true;
+            this.materialLabel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
+            this.materialLabel2.Depth = 0;
+            this.materialLabel2.Font = new System.Drawing.Font("Roboto", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.materialLabel2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.materialLabel2.Location = new System.Drawing.Point(200, 75);
+            this.materialLabel2.MouseState = MaterialSkin.MouseState.HOVER;
+            this.materialLabel2.Name = "materialLabel2";
+            this.materialLabel2.Size = new System.Drawing.Size(543, 19);
+            this.materialLabel2.TabIndex = 19;
+            this.materialLabel2.Text = "Silakan lakukan Scan terlebih dahulu pada tombol \"Scan SQL Auth\" dibawah";
+            // 
             // Auth
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.materialLabel2);
             this.Controls.Add(this.txtDatabaseManual);
             this.Controls.Add(this.labelDatabaseManual);
             this.Controls.Add(this.labelServerManual);
@@ -289,7 +305,7 @@
             this.Controls.Add(this.cmbServer);
             this.Name = "Auth";
             this.Opacity = 1D;
-            this.Text = "Auth";
+            this.Text = "Authentication Windows SQL Server";
             this.Controls.SetChildIndex(this.cmbServer, 0);
             this.Controls.SetChildIndex(this.cmbDatabase, 0);
             this.Controls.SetChildIndex(this.btnScan, 0);
@@ -303,6 +319,7 @@
             this.Controls.SetChildIndex(this.labelServerManual, 0);
             this.Controls.SetChildIndex(this.labelDatabaseManual, 0);
             this.Controls.SetChildIndex(this.txtDatabaseManual, 0);
+            this.Controls.SetChildIndex(this.materialLabel2, 0);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -322,5 +339,6 @@
         private MaterialSkin.Controls.MaterialLabel labelServerManual;
         private MaterialSkin.Controls.MaterialLabel labelDatabaseManual;
         private MyTextBox txtDatabaseManual;
+        private MaterialSkin.Controls.MaterialLabel materialLabel2;
     }
 }
