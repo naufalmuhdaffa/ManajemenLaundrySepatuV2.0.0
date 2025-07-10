@@ -25,7 +25,7 @@ GO
 CREATE TABLE Akun (
 	id INT IDENTITY(1,1) CONSTRAINT PK_Akun_id PRIMARY KEY,
 	username VARCHAR(50) NOT NULL CONSTRAINT UQ_Akun_username UNIQUE,
-	password_hash VARCHAR(255) NOT NULL,
+	password_hash CHAR(64) NOT NULL,
 );
 GO
 

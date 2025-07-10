@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics.Metrics;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace ManajemenLaundrySepatu
@@ -239,6 +241,27 @@ namespace ManajemenLaundrySepatu
             if (!decimal.TryParse(inputTotalHarga.Texts.Trim(), out decimal totalHarga))
             {
                 DarkModeMessageBox.Show("Total Harga harus berupa angka!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (idPelanggan.Length > 4)
+            {
+                DarkModeMessageBox.Show("Panjang ID Pelanggan Maksimal 4 karakter", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                inputIdPelanggan.Focus();
+                return;
+            }
+
+            if (totalHarga < 0 || totalHarga > 99999999.99m)
+            {
+                DarkModeMessageBox.Show("Total harga harus antara 0 dan 99.999.999,99!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                inputTotalHarga.Focus();
+                return;
+            }
+
+            if (status.Length > 10)
+            {
+                DarkModeMessageBox.Show("Panjang Status Transaksi Maksimal 10 karakter", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                comboStatus.Focus();
                 return;
             }
 

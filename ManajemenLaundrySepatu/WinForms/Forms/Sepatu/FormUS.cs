@@ -1,8 +1,11 @@
 ﻿using ManajemenLaundrySepatu.Helpers;
 using ManajemenLaundrySepatu.WinForms.Helpers;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics.Metrics;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace ManajemenLaundrySepatu
@@ -99,6 +102,47 @@ namespace ManajemenLaundrySepatu
         private void btnUpdate_Click(object sender, EventArgs e)
         {
             if (!Session.CekSession()) return;
+
+            string id = inputIdPelanggan.Texts.Trim();
+            string merek = inputMerek.Texts.Trim();
+            string jenis = inputJenis.Texts.Trim();
+            string warna = inputWarna.Texts.Trim();
+            string ukuran = inputUkuran.Texts.Trim();
+
+            if (id.Length > 4)
+            {
+                DarkModeMessageBox.Show("Panjang ID Pelanggan Maksimal 4 karakter", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                inputIdPelanggan.Focus();
+                return;
+            }
+
+            if (merek.Length > 100)
+            {
+                DarkModeMessageBox.Show("Panjang Merek Sepatu Maksimal 100 karakter", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                inputMerek.Focus();
+                return;
+            }
+
+            if (jenis.Length > 50)
+            {
+                DarkModeMessageBox.Show("Panjang Jenis Sepatu Maksimal 50 karakter", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                inputJenis.Focus();
+                return;
+            }
+
+            if (warna.Length > 50)
+            {
+                DarkModeMessageBox.Show("Panjang Warna Sepatu Maksimal 50 karakter", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                inputWarna.Focus();
+                return;
+            }
+
+            if (ukuran.Length > 5)
+            {
+                DarkModeMessageBox.Show("Panjang Ukuran Sepatu Maksimal 5 karakter", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                inputUkuran.Focus();
+                return;
+            }
 
             if (string.IsNullOrWhiteSpace(inputIdSepatu.Texts) || string.IsNullOrWhiteSpace(inputIdPelanggan.Texts))
             {

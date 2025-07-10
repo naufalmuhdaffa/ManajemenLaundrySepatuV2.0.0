@@ -96,6 +96,39 @@ namespace ManajemenLaundrySepatu
         {
             if (!Session.CekSession()) return;
 
+            string id = inputIdPelanggan.Texts.Trim();
+            string nama = inputNamaPelanggan.Texts.Trim();
+            string noHp = inputNoHP.Texts.Trim();
+            string alamat = inputAlamat.Texts.Trim();
+
+            if (id.Length > 4)
+            {
+                DarkModeMessageBox.Show("Panjang ID Pelanggan Maksimal 4 karakter", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                inputIdPelanggan.Focus();
+                return;
+            }
+
+            if (nama.Length > 100)
+            {
+                DarkModeMessageBox.Show("Panjang Nama Pelanggan Maksimal 100 karakter", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                inputNamaPelanggan.Focus();
+                return;
+            }
+
+            if (noHp.Length > 13)
+            {
+                DarkModeMessageBox.Show("Panjang No HP Pelanggan Maksimal 13 karakter", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                inputNoHP.Focus();
+                return;
+            }
+
+            if (alamat.Length > 100)
+            {
+                DarkModeMessageBox.Show("Panjang Alamat Pelanggan Maksimal 100 karakter", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                inputAlamat.Focus();
+                return;
+            }
+
             if (inputIdPelanggan.Texts == "" || inputNamaPelanggan.Texts == "" || inputNoHP.Texts == "")
             {
                 DarkModeMessageBox.Show("Isi data yang diperlukan dulu dong~", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);

@@ -37,6 +37,34 @@ namespace ManajemenLaundrySepatu
                 return;
             }
 
+            if (id.Length > 4)
+            {
+                DarkModeMessageBox.Show("Panjang ID Pelanggan Maksimal 4 karakter", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                inputIdPelanggan.Focus();
+                return;
+            }
+
+            if (nama.Length > 100)
+            {
+                DarkModeMessageBox.Show("Panjang Nama Pelanggan Maksimal 100 karakter", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                inputNamaPelanggan.Focus();
+                return;
+            }
+
+            if (noHp.Length > 13)
+            {
+                DarkModeMessageBox.Show("Panjang No HP Pelanggan Maksimal 13 karakter", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                inputNoHP.Focus();
+                return;
+            }
+
+            if (alamat.Length > 100)
+            {
+                DarkModeMessageBox.Show("Panjang Alamat Pelanggan Maksimal 100 karakter", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                inputAlamat.Focus();
+                return;
+            }
+
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 try

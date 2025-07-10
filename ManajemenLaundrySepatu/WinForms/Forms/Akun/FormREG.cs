@@ -39,6 +39,13 @@ namespace ManajemenLaundrySepatu
                 return;
             }
 
+            if (username.Length > 50)
+            {
+                DarkModeMessageBox.Show("Panjang ID Pelanggan Maksimal 4 karakter", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                inputUsername.Focus();
+                return;
+            }
+
             string hashedPassword = HashPassword(password);
 
             using (SqlConnection conn = new SqlConnection(connectionString))

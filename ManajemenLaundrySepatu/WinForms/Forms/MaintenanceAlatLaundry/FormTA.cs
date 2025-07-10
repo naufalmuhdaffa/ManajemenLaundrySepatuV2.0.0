@@ -36,6 +36,20 @@ namespace ManajemenLaundrySepatu
                 return;
             }
 
+            if (namaAlat.Length > 100)
+            {
+                DarkModeMessageBox.Show("Panjang Nama Alat Maksimal 100 karakter", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                inputNamaAlat.Focus();
+                return;
+            }
+
+            if (deskripsi.Length > 100)
+            {
+                DarkModeMessageBox.Show("Panjang Deskripsi Maksimal 100 karakter", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                inputDeskripsi.Focus();
+                return;
+            }
+
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 try

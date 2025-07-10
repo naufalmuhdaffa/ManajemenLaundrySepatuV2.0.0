@@ -96,6 +96,9 @@ namespace ManajemenLaundrySepatu
         {
             if (!Session.CekSession()) return;
 
+            string nama = inputNamaBarang.Texts.Trim();
+            string satuan = inputSatuan.Texts.Trim();
+
             if (inputIdBarang.Texts == "" || inputNamaBarang.Texts == "" || inputJumlah.Texts == "")
             {
                 DarkModeMessageBox.Show("Isi semua data yang wajib yaa~", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -114,6 +117,20 @@ namespace ManajemenLaundrySepatu
             {
                 DarkModeMessageBox.Show("Gak ada yang berubah, jangan boongin aku dong~ hmph!", "Info",
                                 MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            if (nama.Length > 100)
+            {
+                DarkModeMessageBox.Show("Panjang Nama Barang Maksimal 100 karakter", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                inputNamaBarang.Focus();
+                return;
+            }
+
+            if (satuan.Length > 50)
+            {
+                DarkModeMessageBox.Show("Panjang Satuan Maksimal 50 karakter", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                inputSatuan.Focus();
                 return;
             }
 

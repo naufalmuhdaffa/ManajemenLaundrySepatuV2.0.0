@@ -119,6 +119,27 @@ namespace ManajemenLaundrySepatu
                 return;
             }
 
+            if (idPelanggan.Length > 4)
+            {
+                DarkModeMessageBox.Show("Panjang ID Pelanggan Maksimal 4 karakter", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                inputIdPelanggan.Focus();
+                return;
+            }
+
+            if (totalHarga < 0 || totalHarga > 99999999.99m)
+            {
+                DarkModeMessageBox.Show("Total harga harus antara 0 dan 99.999.999,99!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                inputTotalHarga.Focus();
+                return;
+            }
+
+            if (status.Length > 10)
+            {
+                DarkModeMessageBox.Show("Panjang Status Transaksi Maksimal 10 karakter", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                comboStatus.Focus();
+                return;
+            }
+
             if (Math.Round(_origTotalHarga, 2) == Math.Round(totalHarga, 2) &&
     string.Equals(_origStatus?.Trim(), status?.Trim(), StringComparison.OrdinalIgnoreCase))
             {
