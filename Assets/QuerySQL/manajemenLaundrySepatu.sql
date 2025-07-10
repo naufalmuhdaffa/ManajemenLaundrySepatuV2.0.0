@@ -1212,7 +1212,8 @@ BEGIN
         SELECT id_maintenance AS [ID Alat],
                nama_alat AS [Nama Alat],
                tanggal_maintenance AS [Tanggal],
-               deskripsi AS [Deskripsi]
+               deskripsi AS [Deskripsi],
+               tanggal_dibuat AS [Dibuat Pada]
         FROM Maintenance_Alat_Laundry
         WHERE id_akun = @id_akun;
     END TRY

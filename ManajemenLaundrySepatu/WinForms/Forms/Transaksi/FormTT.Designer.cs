@@ -49,7 +49,7 @@
             this.btnKembali.HighEmphasis = true;
             this.btnKembali.Icon = null;
             this.btnKembali.IsDarkTheme = false;
-            this.btnKembali.Location = new System.Drawing.Point(7, 384);
+            this.btnKembali.Location = new System.Drawing.Point(7, 405);
             this.btnKembali.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.btnKembali.MouseState = MaterialSkin.MouseState.HOVER;
             this.btnKembali.Name = "btnKembali";
