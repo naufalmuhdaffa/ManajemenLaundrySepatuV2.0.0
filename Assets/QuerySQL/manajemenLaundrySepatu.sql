@@ -2,10 +2,19 @@
 					--== Database Manajemen Laundry Sepatu ==--
 					--=======================================--
 
+IF DB_ID('manajemenLaundrySepatu') IS NOT NULL
+BEGIN
+    USE master;
+    ALTER DATABASE manajemenLaundrySepatu SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE manajemenLaundrySepatu;
+END
+GO
+
 CREATE DATABASE manajemenLaundrySepatu;
+GO
 
 USE manajemenLaundrySepatu;
-
+GO
 
 
 					--===========--
@@ -14,62 +23,65 @@ USE manajemenLaundrySepatu;
 
   -- Akun --
 CREATE TABLE Akun (
-	id int identity(1,1) primary key,
-	username varchar(50) not null unique,
-	password_hash varchar(255) not null,
+	id INT IDENTITY(1,1) CONSTRAINT PK_Akun_id PRIMARY KEY,
+	username VARCHAR(50) NOT NULL CONSTRAINT UQ_Akun_username UNIQUE,
+	password_hash VARCHAR(255) NOT NULL,
 );
+GO
 
   -- Tabel Pelanggan --
 CREATE TABLE Pelanggan (
-    id_pelanggan CHAR(4) PRIMARY KEY,
+    id_pelanggan CHAR(4) CONSTRAINT PK_Pelanggan_id_pelanggan PRIMARY KEY,
     nama VARCHAR(100) NOT NULL,
     no_hp VARCHAR(13) NOT NULL,
     alamat VARCHAR(100),
-	CONSTRAINT check_no_hp 
-	CHECK (
-	no_hp LIKE '08%' AND LEN(no_hp) BETWEEN 10 AND 13
-	)
+	CONSTRAINT check_no_hp CHECK (no_hp LIKE '08%' AND LEN(no_hp) BETWEEN 10 AND 13)
 );
+GO
 
   -- Tabel Sepatu --
 CREATE TABLE Sepatu (
-	id_sepatu INT IDENTITY(1,1) primary key,
+	id_sepatu INT IDENTITY(1,1) CONSTRAINT PK_Sepatu_id_sepatu PRIMARY KEY,
 	id_pelanggan CHAR(4) NOT NULL,
     merek VARCHAR(100),
     jenis VARCHAR(50),
     warna VARCHAR(50),
     ukuran VARCHAR(5),
-    FOREIGN KEY (id_pelanggan) REFERENCES Pelanggan(id_pelanggan)
+    CONSTRAINT FK_Sepatu_id_pelanggan FOREIGN KEY (id_pelanggan) REFERENCES Pelanggan(id_pelanggan)
 );
+GO
 
   -- Tabel Transaksi --
 CREATE TABLE Transaksi (
-    id_transaksi INT IDENTITY(1,1) PRIMARY KEY,
+    id_transaksi INT IDENTITY(1,1) CONSTRAINT PK_Transaksi_id_transaksi PRIMARY KEY,
     id_pelanggan CHAR(4) NOT NULL,
     id_sepatu INT NOT NULL,
     tanggal_transaksi DATETIME DEFAULT GETDATE() NOT NULL,
     total_harga DECIMAL(10,2) NOT NULL,
-    status VARCHAR(10) CHECK (status IN ('Proses', 'Selesai', 'Dibatalkan')),
-    FOREIGN KEY (id_pelanggan) REFERENCES Pelanggan(id_pelanggan),
-    FOREIGN KEY (id_sepatu) REFERENCES Sepatu(id_sepatu)
+    status VARCHAR(10) 
+    CONSTRAINT CK_Transaksi_status CHECK (status IN ('Proses', 'Selesai', 'Dibatalkan')),
+    CONSTRAINT FK_Transaksi_id_pelanggan FOREIGN KEY (id_pelanggan) REFERENCES Pelanggan(id_pelanggan),
+    CONSTRAINT FK_Transaksi_id_sepatu FOREIGN KEY (id_sepatu) REFERENCES Sepatu(id_sepatu)
 );
+GO
 
   -- Barang Konsumsi --
 CREATE TABLE Barang_Konsumsi (
-    id_barang INT IDENTITY(1,1) PRIMARY KEY,
+    id_barang INT IDENTITY(1,1) CONSTRAINT PK_Barang_id PRIMARY KEY,
     nama_barang VARCHAR(100) NOT NULL,
     jumlah INT NOT NULL,
     satuan VARCHAR(50)
 );
+GO
 
   -- Maintenance Alat Laundry --
 CREATE TABLE Maintenance_Alat_Laundry (
-    id_maintenance INT IDENTITY(1,1) PRIMARY KEY,
+    id_maintenance INT IDENTITY(1,1) CONSTRAINT PK_Maintenance_id PRIMARY KEY,
     nama_alat VARCHAR(100) NOT NULL,
     tanggal_maintenance DATE NOT NULL,
     deskripsi VARCHAR(100)
 );
-
+GO
 
 
 					--===========--
@@ -79,8 +91,8 @@ CREATE TABLE Maintenance_Alat_Laundry (
 					--== Tabel Pelanggan ==--
 
   -- Periksa Constraint Sebelum Alter --
-SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
-WHERE TABLE_NAME = 'Pelanggan';
+--SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+--WHERE TABLE_NAME = 'Pelanggan';
 
   -- Tambah Constraint: "id_pelanggan" harus: 
   -- 1. Angka
@@ -90,6 +102,7 @@ ADD CONSTRAINT check_id_pelanggan
 CHECK (
     id_pelanggan NOT LIKE '%[^0-9]%' AND LEN(id_pelanggan) = 4
 );
+GO
 
   -- Tambah Constraint: "nama" hanya bisa pakai: 
   -- 1. Huruf abjad (kapital/non-kapital)
@@ -101,15 +114,18 @@ ADD CONSTRAINT check_nama
 CHECK (
     nama NOT LIKE '%[^A-Za-z ''-]%'
 );
+GO
 
   -- Hapus Constraint: "no_hp" --
 ALTER TABLE Pelanggan 
 DROP CONSTRAINT check_no_hp;
+GO
 
   -- Tambah Constraint: "no_hp" harus: 
   -- 1. Unik --
 ALTER TABLE Pelanggan
 ADD CONSTRAINT uq_no_hp UNIQUE (no_hp);
+GO
 
   -- Tambah Constraint: "no_hp" harus: 
   -- 1. Dimulai dengan '08'
@@ -120,18 +136,37 @@ ADD CONSTRAINT check_no_hp
 CHECK (
     no_hp LIKE '08%' AND LEN(no_hp) BETWEEN 10 AND 13 AND no_hp NOT LIKE '%[^0-9]%'
 );
+GO
+
+  -- Tambah Constraint 
+  -- Tanpa cek data yang sudah ada di tabel: 
+  -- "alamat" hanya bisa pakai: 
+  -- 1. Huruf abjad (kapital/non-kapital)
+  -- 2. Spasi
+  -- 3. Tanda setrip
+  -- 4. Koma
+  -- 5. Titik
+  -- 6. Angka
+  -- 7. Slash/garis miring
+ALTER TABLE Pelanggan
+WITH NOCHECK ADD CONSTRAINT check_alamat 
+CHECK (
+    alamat NOT LIKE '%[^A-Za-z0-9 .,/-]%'
+);
+GO
 
   -- Tambah Foreign Key: "id_akun" --
 ALTER TABLE Pelanggan
 ADD id_akun INT NOT NULL
-    FOREIGN KEY REFERENCES Akun(id);
+    CONSTRAINT FK_Pelanggan_id_akun FOREIGN KEY REFERENCES Akun(id);
+GO
 
 
 					--== Tabel Sepatu ==--
 
   -- Periksa Constraint Sebelum Alter --
-SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
-WHERE TABLE_NAME = 'Sepatu';
+--SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+--WHERE TABLE_NAME = 'Sepatu';
 
   -- Tambah Constraint: "merek" hanya bisa pakai: 
   -- 1. Huruf abjad (kapital/non-kapital)
@@ -143,6 +178,7 @@ ADD CONSTRAINT CK_Sepatu_Merek
 CHECK (
     merek NOT LIKE '%[^a-zA-Z0-9 ''-]%'
 );
+GO
 
   -- Tambah Constraint: "jenis" hanya bisa pakai: 
   -- 1. Huruf abjad (kapital/non-kapital)
@@ -155,6 +191,7 @@ ADD CONSTRAINT CK_Sepatu_Jenis
 CHECK (
     jenis NOT LIKE '%[^a-zA-Z0-9 ''-]%'
 );
+GO
 
   -- Tambah Constraint: "warna" hanya bisa pakai: 
   -- 1. Huruf abjad (kapital/non-kapital)
@@ -165,6 +202,7 @@ ADD CONSTRAINT CK_Sepatu_Warna
 CHECK (
     warna NOT LIKE '%[^a-zA-Z- ]%'
 );
+GO
 
   -- Tambah Constraint: "ukuran" hanya bisa pakai: 
   -- 1. Angka tanpa huruf
@@ -182,36 +220,41 @@ CHECK (
         AND ukuran NOT LIKE '%[0-9]%'
     )
 );
+GO
 
   -- Tambah Foreign Key: "id_akun" --
 ALTER TABLE Sepatu
 ADD id_akun INT NOT NULL
-    FOREIGN KEY REFERENCES Akun(id);
+    CONSTRAINT FK_Sepatu_id_akun FOREIGN KEY REFERENCES Akun(id);
+GO
 
 
         -- Foreign Key Cascade --
 ALTER TABLE Sepatu
-DROP CONSTRAINT FK__Sepatu__id_pelan__18EBB532;
+DROP CONSTRAINT FK_Sepatu_id_pelanggan;
+GO
 
 ALTER TABLE Sepatu
-  ADD CONSTRAINT FK_Sepatu_Pelanggan
+  ADD CONSTRAINT FK_Sepatu_id_pelanggan
     FOREIGN KEY (id_pelanggan)
     REFERENCES Pelanggan(id_pelanggan)
     ON DELETE CASCADE;
+GO
 
 
 					--== Tabel Transaksi ==--
 
   -- Periksa Constraint Sebelum Alter --
-SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
-WHERE TABLE_NAME = 'Transaksi';
+--SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+--WHERE TABLE_NAME = 'Transaksi';
 
-SELECT name 
-FROM sys.check_constraints 
-WHERE parent_object_id = OBJECT_ID('Transaksi');
+--SELECT name 
+--FROM sys.check_constraints 
+--WHERE parent_object_id = OBJECT_ID('Transaksi');
 
 ALTER TABLE Transaksi
-DROP CONSTRAINT CK__Transaksi__statu__1CBC4616;
+DROP CONSTRAINT CK_Transaksi_status;
+GO
 
 
   -- Menjalankan system stored procedure 
@@ -219,20 +262,23 @@ DROP CONSTRAINT CK__Transaksi__statu__1CBC4616;
   -- pada tabel Transaksi --
 EXEC sp_rename 
 'Transaksi.status', 'status_transaksi', 'COLUMN';
+GO
 
 
   -- Tambah Constraint: "status_transaksi" hanya bisa pakai: 
   -- 1. Salah satu dari nilai yg sudah ditetapkan:
   -- 'Proses', 'Selesai', 'Dibatalkan' --
 ALTER TABLE Transaksi
-ADD CONSTRAINT check_Transaksi_status_transaksi
+ADD CONSTRAINT CK_Transaksi_status
 CHECK (
 	status_transaksi IN ('Proses', 'Selesai', 'Dibatalkan')
 );
+GO
 
   -- Mengubah "status_transaksi" menjadi NOT NULL --
 ALTER TABLE Transaksi
 ALTER COLUMN status_transaksi VARCHAR(10) NOT NULL;
+GO
 
   -- Tambah Constraint: "total_harga" harus: 
   -- 1. Lebih dari atau sama dengan 0 nilainya (tidak boleh negatif) --
@@ -241,33 +287,38 @@ ADD CONSTRAINT check_total_harga
 CHECK (
 	total_harga >= 0
 );
+GO
 
   -- Tambah Foreign Key: "id_akun" --
 ALTER TABLE Transaksi
 ADD id_akun INT NOT NULL
-    FOREIGN KEY REFERENCES Akun(id);
+    CONSTRAINT FK_Transaksi_id_akun FOREIGN KEY REFERENCES Akun(id);
+GO
 
 
     -- Foreign Key Cascade --
 ALTER TABLE Transaksi
-DROP CONSTRAINT FK__Transaksi__id_pe__1DB06A4F;
+DROP CONSTRAINT FK_Transaksi_id_pelanggan;
+GO
 
 ALTER TABLE Transaksi
-DROP CONSTRAINT FK__Transaksi__id_se__1EA48E88;
+DROP CONSTRAINT FK_Transaksi_id_sepatu;
+GO
 
 ALTER TABLE Transaksi
-ADD CONSTRAINT FK_Transaksi_Sepatu
+ADD CONSTRAINT FK_Transaksi_id_sepatu
   FOREIGN KEY (id_sepatu)
   REFERENCES Sepatu(id_sepatu)
   ON DELETE CASCADE;
+GO
 
 
 
 					--== Tabel Barang_Konsumsi ==--
 
   -- Periksa Constraint Sebelum Alter --
-SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
-WHERE TABLE_NAME = 'Barang_Konsumsi';
+--SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+--WHERE TABLE_NAME = 'Barang_Konsumsi';
 
   -- Tambah Constraint: "nama_barang" hanya bisa pakai: 
   -- 1. Huruf abjad (kapital/non-kapital)
@@ -279,6 +330,7 @@ ADD CONSTRAINT check_nama_barang_konsumsi
 CHECK (
     nama_barang NOT LIKE '%[^A-Za-z ''-]%'
 );
+GO
 
   -- Tambah Constraint: "jumlah" harus: 
   -- 1. Lebih dari atau sama dengan 0 nilainya (tidak boleh negatif) --
@@ -287,6 +339,7 @@ ADD CONSTRAINT check_jumlah_barang_konsumsi
 CHECK (
 	jumlah >= 0
 );
+GO
 
   -- Tambah Constraint: "satuan" hanya bisa pakai: 
   -- 1. Huruf abjad (kapital/non-kapital)
@@ -296,17 +349,19 @@ ADD CONSTRAINT check_satuan_barang_konsumsi
 CHECK (
     satuan NOT LIKE '%[^A-Za-z ]%'
 );
+GO
 
   -- Tambah Foreign Key: "id_akun" --
 ALTER TABLE Barang_Konsumsi
 ADD id_akun INT NOT NULL
-    FOREIGN KEY REFERENCES Akun(id);
+    CONSTRAINT FK_Barang_id_akun FOREIGN KEY REFERENCES Akun(id);
+GO
 
 					--== Tabel Maintenance_Alat_Laundry ==--
 
   -- Periksa Constraint Sebelum Alter --
-SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
-WHERE TABLE_NAME = 'Maintenance_Alat_Laundry';
+--SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+--WHERE TABLE_NAME = 'Maintenance_Alat_Laundry';
 
   -- Tambah Constraint: "nama_alat" hanya bisa pakai: 
   -- 1. Huruf abjad (kapital/non-kapital)
@@ -319,25 +374,29 @@ ADD CONSTRAINT check_nama_alat_laundry
 CHECK (
     nama_alat NOT LIKE '%[^A-Za-z0-9 ''-]%'
 );
+GO
 
   -- Tambah Kolom Baru: "tanggal_dibuat" --
 ALTER TABLE Maintenance_Alat_Laundry
 ADD tanggal_dibuat 
 DATE NOT NULL DEFAULT CAST(GETDATE() AS DATE);
+GO
 
 ALTER TABLE Maintenance_Alat_Laundry
 ADD CONSTRAINT df_deskripsi_default DEFAULT '' FOR deskripsi;
+GO
 
   -- Tambah Foreign Key: "id_akun" --
 ALTER TABLE Maintenance_Alat_Laundry
 ADD id_akun INT NOT NULL
-	FOREIGN KEY REFERENCES Akun(id);
+	CONSTRAINT FK_Maintenance_id_akun FOREIGN KEY REFERENCES Akun(id);
+GO
 
 					--== Tabel Akun ==--
 
   -- Periksa Constraint Sebelum Alter --
-SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
-WHERE TABLE_NAME = 'Akun';
+--SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+--WHERE TABLE_NAME = 'Akun';
 
   -- Tambah Kolom Baru: 
   -- 1. FailedLoginAttempts
@@ -345,23 +404,27 @@ WHERE TABLE_NAME = 'Akun';
 ALTER TABLE Akun
 ADD FailedLoginAttempts INT NOT NULL DEFAULT 0,
     LockoutEnd DATETIME NULL;
+GO
 
   -- Hapus Constraint: "username" --
 ALTER TABLE Akun
-DROP CONSTRAINT UQ__Akun__F3DBC57281A2E157;
+DROP CONSTRAINT UQ_Akun_username;
+GO
 
   -- Ubah "Username" jadi Case-Sensitive --
 ALTER TABLE Akun
 ALTER COLUMN username 
 VARCHAR(50) COLLATE Latin1_General_CS_AS NOT NULL;
+GO
 
   -- Tambah Constraint: "username" harus: 
   -- 1. Unik --
 ALTER TABLE Akun
-ADD CONSTRAINT UQ_Akun_Username 
+ADD CONSTRAINT UQ_Akun_username 
 UNIQUE (
 	username
 );
+GO
 
 
 
@@ -375,8 +438,6 @@ ON Pelanggan
 AFTER DELETE
 AS
 BEGIN
-    SET NOCOUNT ON;
-
     -- 1) Hapus Transaksi via Sepatu milik pelanggan ini
     DELETE t
     FROM Transaksi t
@@ -397,8 +458,6 @@ ON Sepatu
 AFTER DELETE
 AS
 BEGIN
-    SET NOCOUNT ON;
-
     -- Hapus Transaksi yang berelasi
     DELETE t
     FROM Transaksi t
@@ -410,7 +469,7 @@ GO
   -- Maintenance_Alat_Laundry --
 CREATE TRIGGER trg_ValidasiUpdateMaintenance
 ON Maintenance_Alat_Laundry
-AFTER UPDATE
+AFTER INSERT, UPDATE
 AS
 BEGIN
     IF EXISTS (
@@ -439,16 +498,8 @@ BEGIN
         ROLLBACK TRANSACTION;
         RETURN;
     END;
-
-    UPDATE m
-    SET
-        m.nama_alat = i.nama_alat,
-        m.tanggal_maintenance = i.tanggal_maintenance,
-        m.deskripsi = i.deskripsi
-    FROM Maintenance_Alat_Laundry m
-    JOIN inserted i ON m.id_maintenance = i.id_maintenance
-	WHERE m.id_akun = i.id_akun;
 END;
+GO
 
 
 
@@ -457,18 +508,18 @@ END;
 					--==============================--
 
   -- Cek Nilai Identity Sekarang --
-DBCC CHECKIDENT ('Sepatu');
-DBCC CHECKIDENT ('Transaksi');
-DBCC CHECKIDENT ('Barang_Konsumsi');
-DBCC CHECKIDENT ('Maintenance_Alat_Laundry');
-DBCC CHECKIDENT ('Akun');
+--DBCC CHECKIDENT ('Sepatu');
+--DBCC CHECKIDENT ('Transaksi');
+--DBCC CHECKIDENT ('Barang_Konsumsi');
+--DBCC CHECKIDENT ('Maintenance_Alat_Laundry');
+--DBCC CHECKIDENT ('Akun');
 
   -- Atur Ulang Nilai Identity --
-DBCC CHECKIDENT ('Sepatu', RESEED, 1);
-DBCC CHECKIDENT ('Transaksi', RESEED, 1);
-DBCC CHECKIDENT ('Barang_Konsumsi', RESEED, 1);
-DBCC CHECKIDENT ('Maintenance_Alat_Laundry', RESEED, 1);
-DBCC CHECKIDENT ('Akun', RESEED, 1);
+--DBCC CHECKIDENT ('Sepatu', RESEED, 1);
+--DBCC CHECKIDENT ('Transaksi', RESEED, 1);
+--DBCC CHECKIDENT ('Barang_Konsumsi', RESEED, 1);
+--DBCC CHECKIDENT ('Maintenance_Alat_Laundry', RESEED, 1);
+--DBCC CHECKIDENT ('Akun', RESEED, 1);
 
 
 					--===================--
@@ -476,30 +527,30 @@ DBCC CHECKIDENT ('Akun', RESEED, 1);
 					--===================--
 
   -- Pelanggan
-SELECT nama FROM Pelanggan;
-DELETE FROM Pelanggan;
+--SELECT nama FROM Pelanggan;
+--DELETE FROM Pelanggan;
 
   -- Sepatu
-SELECT * FROM Sepatu;
-DELETE FROM Sepatu;
+--SELECT * FROM Sepatu;
+--DELETE FROM Sepatu;
 
   -- Transaksi
-SELECT * FROM Transaksi;
-DELETE FROM Transaksi;
+--SELECT * FROM Transaksi;
+--DELETE FROM Transaksi;
 
   -- Barang_Konsumsi
-SELECT * FROM Barang_Konsumsi;
-DELETE FROM Barang_Konsumsi;
+--SELECT * FROM Barang_Konsumsi;
+--DELETE FROM Barang_Konsumsi;
 
   -- Maintenance_Alat_Laundry
-SELECT * FROM Maintenance_Alat_Laundry;
-DELETE FROM Maintenance_Alat_Laundry;
+--SELECT * FROM Maintenance_Alat_Laundry;
+--DELETE FROM Maintenance_Alat_Laundry;
 
   -- Akun
-SELECT * FROM Akun;
-DELETE FROM Akun;
+--SELECT * FROM Akun;
+--DELETE FROM Akun;
 
-exec sp_helpindex 'Transaksi';
+--exec sp_helpindex 'Transaksi';
 
 					--======================--
 					--== Stored Procedure ==--
@@ -530,6 +581,7 @@ BEGIN
         THROW;
     END CATCH
 END
+GO
 
   -- Ambil data Akun (untuk Register)
 CREATE PROCEDURE sp_ReadAkun
@@ -548,6 +600,7 @@ BEGIN
 		THROW;
     END CATCH
 END
+GO
 
   -- 
 CREATE PROCEDURE sp_GetAkun
@@ -566,6 +619,7 @@ BEGIN
 		THROW;
     END CATCH
 END
+GO
 
   -- Ambil Data Akun (untuk Login)
 CREATE PROCEDURE sp_LoginAkun
@@ -588,6 +642,7 @@ BEGIN
 		THROW; 
     END CATCH
 END
+GO
 
 
   -- Jika Login Gagal
@@ -618,6 +673,7 @@ BEGIN
 		THROW; 
     END CATCH
 END
+GO
 
 
   -- Jika Login Berhasil
@@ -646,6 +702,7 @@ BEGIN
 		THROW; 
     END CATCH
 END
+GO
 
 
 					--== Pelanggan ==--
@@ -677,6 +734,7 @@ BEGIN
 		THROW; 
     END CATCH
 END
+GO
 
 -- 2. READ: Ambil Semua Pelanggan
 CREATE PROCEDURE sp_ReadPelanggan
@@ -698,6 +756,7 @@ BEGIN
 		THROW; 
     END CATCH
 END
+GO
 
 
 -- 3. UPDATE: Ubah Data Pelanggan
@@ -731,6 +790,7 @@ BEGIN
 		THROW; 
     END CATCH
 END
+GO
 
 -- 4. DELETE: Hapus Pelanggan
 CREATE PROCEDURE sp_DeletePelanggan
@@ -757,6 +817,7 @@ BEGIN
 		THROW; 
     END CATCH
 END
+GO
 
 
 					--== Sepatu ==--
@@ -788,6 +849,7 @@ BEGIN
 		THROW; 
     END CATCH
 END
+GO
 
 
   -- Ambil
@@ -811,6 +873,7 @@ BEGIN
 		THROW; 
     END CATCH
 END
+GO
 
   -- Update
 CREATE PROCEDURE sp_UpdateSepatu
@@ -846,6 +909,7 @@ BEGIN
 		THROW; 
     END CATCH
 END
+GO
 
 
   -- Delete
@@ -872,6 +936,7 @@ BEGIN
 		THROW; 
     END CATCH
 END
+GO
 
 
 					--== Transaksi ==--
@@ -902,6 +967,7 @@ BEGIN
 		THROW; 
     END CATCH
 END
+GO
 
  -- Ambil
 CREATE PROCEDURE sp_ReadTransaksi
@@ -923,6 +989,7 @@ BEGIN
 		THROW; 
     END CATCH
 END
+GO
 
 
   -- Update
@@ -957,6 +1024,7 @@ BEGIN
 		THROW; 
     END CATCH
 END
+GO
 
   -- Delete
 CREATE PROCEDURE sp_DeleteTransaksi
@@ -982,6 +1050,7 @@ BEGIN
 		THROW; 
     END CATCH
 END
+GO
 
 
 
@@ -1012,6 +1081,7 @@ BEGIN
 		THROW; 
     END CATCH
 END
+GO
 
   -- Ambil
 CREATE PROCEDURE sp_ReadBarangKonsumsi
@@ -1032,6 +1102,7 @@ BEGIN
 		THROW; 
     END CATCH
 END
+GO
 
  -- Update
 CREATE PROCEDURE sp_UpdateBarangKonsumsi
@@ -1063,6 +1134,7 @@ BEGIN
 		THROW; 
     END CATCH
 END
+GO
 
  -- Delete
 CREATE PROCEDURE sp_DeleteBarangKonsumsi
@@ -1088,6 +1160,7 @@ BEGIN
 		THROW; 
     END CATCH
 END
+GO
 
 
 					--== Maintenance_Alat_Laundry ==--
@@ -1128,6 +1201,7 @@ BEGIN
         THROW;
     END CATCH
 END
+GO
 
   -- Ambil
 CREATE PROCEDURE sp_ReadMaintenanceAlatLaundry
@@ -1148,6 +1222,7 @@ BEGIN
 		THROW; 
     END CATCH
 END
+GO
 
 
   -- Update
@@ -1182,6 +1257,7 @@ BEGIN
 		THROW; 
     END CATCH
 END
+GO
 
 
   -- Delete
@@ -1209,6 +1285,7 @@ BEGIN
 		THROW; 
     END CATCH
 END
+GO
 
 					--== View ==--
 
@@ -1239,6 +1316,7 @@ BEGIN
 		THROW; 
     END CATCH
 END
+GO
 
 					--== Database Owner Stored Procedure ==--
 
@@ -1355,6 +1433,7 @@ BEGIN
 		THROW;
     END CATCH
 END;
+GO
 
 CREATE PROCEDURE dbo.sp_Analyze_ReadViewTransaksi
     @id_akun INT
@@ -1375,6 +1454,7 @@ BEGIN
         THROW;
     END CATCH
 END;
+GO
 
                     --== Search ==--
 
@@ -1414,6 +1494,7 @@ BEGIN
         THROW;
     END CATCH
 END
+GO
 
   -- Sepatu
 CREATE PROCEDURE sp_SearchSepatu
@@ -1455,6 +1536,7 @@ BEGIN
         THROW;
     END CATCH
 END
+GO
 
   -- Transaksi
 CREATE PROCEDURE sp_SearchTransaksi
@@ -1496,6 +1578,7 @@ BEGIN
         THROW;
     END CATCH
 END
+GO
 
   -- Barang Konsumsi
 CREATE PROCEDURE sp_SearchBarangKonsumsi
@@ -1533,6 +1616,7 @@ BEGIN
         THROW;
     END CATCH
 END
+GO
 
   -- Maintenance Alat Laundry
 CREATE PROCEDURE sp_SearchMaintenanceAlatLaundry
@@ -1570,6 +1654,7 @@ BEGIN
         THROW;
     END CATCH
 END
+GO
 
 
 
@@ -1578,7 +1663,7 @@ END
 					--==============--
 
   -- Cek Index
-EXEC sp_helpindex 'Transaksi';
+--EXEC sp_helpindex 'Transaksi';
 
   -- (sudah include read, update, delete karena pakai composite index)
   -- Pelanggan 
@@ -1596,6 +1681,7 @@ BEGIN
 END
 ELSE
     PRINT 'idx_Pelanggan_RUD sudah ada.';
+GO
 
   -- Sepatu
 IF NOT EXISTS (
@@ -1612,6 +1698,7 @@ BEGIN
 END
 ELSE
     PRINT 'idx_Sepatu_RUD sudah ada.';
+GO
 
   -- Transaksi
 IF NOT EXISTS (
@@ -1628,6 +1715,7 @@ BEGIN
 END
 ELSE
     PRINT 'idx_Transaksi_RUD sudah ada.';
+GO
 
   -- Barang_Konsumsi
 IF NOT EXISTS (
@@ -1644,6 +1732,7 @@ BEGIN
 END
 ELSE
     PRINT 'idx_BarangKonsumsi_RUD sudah ada.';
+GO
 
   -- Maintenance_Alat_Laundry
 IF NOT EXISTS (
@@ -1660,27 +1749,31 @@ BEGIN
 END
 ELSE
     PRINT 'idx_MaintenanceAlatLaundry_RUD sudah ada.';
+GO
 
 
-SELECT 
-    OBJECT_NAME(ius.object_id) AS TableName,
-    i.name AS IndexName,
-    i.type_desc AS IndexType,
-    ius.user_seeks,
-    ius.user_scans,
-    ius.user_lookups,
-    ius.user_updates,
-    ius.last_user_seek,
-    ius.last_user_scan
-FROM sys.dm_db_index_usage_stats ius
-JOIN sys.indexes i ON i.object_id = ius.object_id AND i.index_id = ius.index_id
-WHERE ius.database_id = DB_ID('manajemenLaundrySepatu')
-ORDER BY ius.user_seeks DESC;
+--SELECT 
+--    OBJECT_NAME(ius.object_id) AS TableName,
+--    i.name AS IndexName,
+--    i.type_desc AS IndexType,
+--    ius.user_seeks,
+--    ius.user_scans,
+--    ius.user_lookups,
+--    ius.user_updates,
+--    ius.last_user_seek,
+--    ius.last_user_scan
+--FROM sys.dm_db_index_usage_stats ius
+--JOIN sys.indexes i ON i.object_id = ius.object_id AND i.index_id = ius.index_id
+--WHERE ius.database_id = DB_ID('manajemenLaundrySepatu')
+--ORDER BY ius.user_seeks DESC;
 
 
-SET SHOWPLAN_TEXT ON;
-EXEC sp_ReadViewTransaksi @id_akun = 1;
-SET SHOWPLAN_TEXT OFF;
+--SET SHOWPLAN_TEXT ON;
+--GO
+--EXEC sp_ReadViewTransaksi @id_akun = 1;
+--GO
+--SET SHOWPLAN_TEXT OFF;
+--GO
 
 
 
@@ -1699,9 +1792,12 @@ BEGIN
 	TO DISK = @BackupPath
 	WITH INIT, NAME = 'Full Backup';
 END;
+GO
 
   -- Restore (di database master)
-CREATE PROCEDURE sp_RestoreDatabase
+USE master;
+GO
+CREATE OR ALTER PROCEDURE sp_RestoreDatabase
 	@BackupPath NVARCHAR(260)
 AS
 BEGIN
@@ -1711,6 +1807,9 @@ BEGIN
 	WITH REPLACE;
 	ALTER DATABASE manajemenLaundrySepatu SET MULTI_USER;
 END;
+GO
+USE manajemenLaundrySepatu;
+GO
 
 					--==========--
 					--== View ==--
@@ -1731,8 +1830,9 @@ FROM Transaksi t
 JOIN Pelanggan p ON t.id_pelanggan = p.id_pelanggan
 JOIN Sepatu s ON t.id_sepatu = s.id_sepatu
 JOIN Akun a ON t.id_akun = a.id;
+GO
 
-SELECT * FROM vw_TransaksiDetail;
+--SELECT * FROM vw_TransaksiDetail;
 
 
 
@@ -1740,6 +1840,12 @@ SELECT * FROM vw_TransaksiDetail;
             --=======================--
             --== Insert Data Dummy ==--
             --=======================--
+
+-- Insert Akun
+-- username: admin
+-- password: admin
+INSERT INTO Akun (username, password_hash)
+VALUES ('admin', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918');
 
             --== 1-50 ==--
 
@@ -1754,7 +1860,7 @@ INSERT INTO Pelanggan (id_pelanggan, nama, no_hp, alamat, id_akun) VALUES ('0007
 INSERT INTO Pelanggan (id_pelanggan, nama, no_hp, alamat, id_akun) VALUES ('0008', 'Gita Permana', '08512889976', 'Jl. Gatot Subroto No.140', 1);
 INSERT INTO Pelanggan (id_pelanggan, nama, no_hp, alamat, id_akun) VALUES ('0009', 'Gita Setiawan', '08387378434', 'Jl. Thamrin No.144', 1);
 INSERT INTO Pelanggan (id_pelanggan, nama, no_hp, alamat, id_akun) VALUES ('0010', 'Andi Santoso', '08994895116', 'Jl. Sudirman No.150', 1);
-INSERT INTO Pelanggan (id_pelanggan, nama, no_hp, alamat, id_akun) VALUES ('00011', 'Joko Permana', '08416070897', 'Jl. Sudirman No.67', 1);
+INSERT INTO Pelanggan (id_pelanggan, nama, no_hp, alamat, id_akun) VALUES ('0011', 'Joko Permana', '08416070897', 'Jl. Sudirman No.67', 1);
 INSERT INTO Pelanggan (id_pelanggan, nama, no_hp, alamat, id_akun) VALUES ('0012', 'Eka Permana', '08313042526', 'Jl. Sudirman No.36', 1);
 INSERT INTO Pelanggan (id_pelanggan, nama, no_hp, alamat, id_akun) VALUES ('0013', 'Budi Nugroho', '08117359672', 'Jl. Diponegoro No.16', 1);
 INSERT INTO Pelanggan (id_pelanggan, nama, no_hp, alamat, id_akun) VALUES ('0014', 'Deni Nugroho', '08243354951', 'Jl. Sudirman No.103', 1);
@@ -1952,55 +2058,55 @@ INSERT INTO Barang_Konsumsi (nama_barang, jumlah, satuan, id_akun) VALUES ('Disi
 INSERT INTO Barang_Konsumsi (nama_barang, jumlah, satuan, id_akun) VALUES ('Pemutih', 26, 'kg', 1);
 
 -- Insert Maintenance_Alat_Laundry
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-01-18', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-01-19', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-18', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-19', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-05-18', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-02-19', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-19', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-25', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-07-05', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-11-14', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-01-06', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-02-02', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-11-04', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-11-09', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-08-11', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-11-03', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-06-15', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-08-31', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-02-01', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-10-18', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-02-11', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-05', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-11-14', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-06', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-02', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-11-04', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-11-09', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-11', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-11-03', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-06-15', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-31', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-01', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-10-18', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-02-11', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-06-07', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-08-02', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-11-15', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-02', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-11-15', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-14', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-02-11', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-07-29', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-11-19', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-04-21', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-10-19', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-02-19', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-03-25', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-10-28', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-03-22', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-11-30', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-05-13', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-08-16', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-11', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-07-29', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-11-19', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-21', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-10-19', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-19', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-03-25', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-10-28', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-03-22', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-11-30', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-13', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-16', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-13', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-02-25', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-01-22', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-25', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-22', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-17', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-03-31', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-07-06', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-05-13', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-03-24', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-09-27', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-08-25', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-04-03', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-09-18', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-08-19', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-01-01', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-05-12', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-31', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-07-06', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-13', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-03-24', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-09-27', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-08-25', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-03', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-09-18', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-08-19', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-01', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-12', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-04', 'Pembersihan mendalam', 1);
 
             
@@ -2217,55 +2323,55 @@ INSERT INTO Barang_Konsumsi (nama_barang, jumlah, satuan, id_akun) VALUES ('Dete
 INSERT INTO Barang_Konsumsi (nama_barang, jumlah, satuan, id_akun) VALUES ('Detergen', 41, 'kg', 1);
 
 -- Insert Maintenance_Alat_Laundry
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-03-07', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-07-20', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-10-31', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-12-31', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-07', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-07-20', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-10-31', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-12-31', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-20', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-06-08', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-03-25', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-25', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-09', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-05-25', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-04-17', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-12-14', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-09-28', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-12-07', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-08-22', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-17', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-12-14', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-09-28', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-12-07', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-08-22', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-06-19', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-02-10', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-09-17', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-09-28', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-10', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-09-17', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-09-28', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-25', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-12-16', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-12-16', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-07', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-07-15', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-01-26', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-02-21', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-07-15', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-26', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-21', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-03', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-06-16', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-07-23', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-03-26', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-04-15', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-12-23', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-06-16', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-07-23', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-26', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-15', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-12-23', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-08', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-03-31', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-08-13', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-04-03', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-11-13', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-31', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-08-13', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-03', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-11-13', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-06-15', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-07-01', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-04-15', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-02-13', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-01', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-15', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-02-13', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-15', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-03-26', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-01-15', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-26', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-15', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-19', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-05-17', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-17', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-06-26', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-02-08', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-07-05', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-03-08', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-07-11', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-02-08', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-07-05', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-03-08', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-07-11', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-09', 'Perawatan rutin', 1);
 
 
@@ -2680,105 +2786,105 @@ INSERT INTO Barang_Konsumsi (nama_barang, jumlah, satuan, id_akun) VALUES ('Sabu
 INSERT INTO Barang_Konsumsi (nama_barang, jumlah, satuan, id_akun) VALUES ('Pemutih', 36, 'pcs', 1);
 
 -- Insert Maintenance_Alat_Laundry
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-08-14', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-05-19', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-10-14', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-01-09', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-14', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-19', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-10-14', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-09', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-08', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-08-08', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-08', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-20', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-31', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-06-25', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-12-05', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-10-08', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-04-29', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-02-13', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-01-18', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-06-25', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-12-05', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-10-08', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-29', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-02-13', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-18', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-15', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-05-08', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-03-20', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-02-14', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-03-20', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-02-14', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-06-26', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-09', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-03-07', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-03-07', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-04', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-02-26', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-11-13', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-12-03', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-02-26', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-11-13', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-12-03', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-03-15', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-10-25', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-07-15', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-02-09', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-01-04', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-09-20', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-02-06', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-08-18', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-08-04', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-10-08', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-11-14', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-08-04', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-10-25', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-07-15', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-02-09', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-04', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-09-20', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-06', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-18', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-04', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-10-08', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-11-14', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-08-04', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-10', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-05-03', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-01-29', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-07-07', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-03-18', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-09-14', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-05-21', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-07-12', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-05-03', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-29', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-07-07', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-18', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-09-14', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-21', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-07-12', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-10', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-06-14', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-09-05', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-09-05', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-30', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-10-05', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-12-31', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-03-16', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-10-05', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-12-31', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-16', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-18', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-01-03', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-11-24', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-01-15', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-06-20', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-09-18', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-03', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-11-24', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-15', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-06-20', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-09-18', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-07', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-12-01', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-03-27', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-12-01', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-03-27', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-08', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-11-16', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-11-16', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-03-03', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-03-20', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-06-19', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-05-04', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-03-20', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-06-19', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-05-04', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-07', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-03-25', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-01-30', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-03-25', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-30', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-16', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-29', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-09-03', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-08-14', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-08-18', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-09-03', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-14', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-18', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-15', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-10-04', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-02-04', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-12-17', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-10-04', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-02-04', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-12-17', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-06-18', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-02-11', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-11', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-03-17', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-02-13', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-12-13', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-13', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-12-13', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-17', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-03-06', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-12-13', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-11-26', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-10-20', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-03-06', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-12-13', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-11-26', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-10-20', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-02-12', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-02-14', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-07-18', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-09-26', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-04-22', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-07-31', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-04-04', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-08-17', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-05-09', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-01-13', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-02-14', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-18', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-09-26', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-22', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-07-31', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-04', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-17', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-09', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-13', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-30', 'Pembersihan mendalam', 1);
 
 
@@ -3193,106 +3299,106 @@ INSERT INTO Barang_Konsumsi (nama_barang, jumlah, satuan, id_akun) VALUES ('Sabu
 INSERT INTO Barang_Konsumsi (nama_barang, jumlah, satuan, id_akun) VALUES ('Detergen', 59, 'kg', 1);
 
 -- Insert Maintenance_Alat_Laundry
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-09-21', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-09-21', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-06-19', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-06', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-11-09', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-09-11', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-10-23', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-10-29', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-07-05', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-04-29', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-04-22', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-01-25', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-11-09', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-09-11', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-10-23', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-10-29', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-07-05', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-29', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-22', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-25', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-24', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-03-31', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-06-14', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-06-03', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-10-27', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-03-08', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-11-08', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-31', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-06-14', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-06-03', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-10-27', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-08', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-11-08', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-27', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-03-08', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-08', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-02-24', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-10-21', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-07-14', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-06-13', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-02-06', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-07-01', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-01-11', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-10-30', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-01-26', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-02-10', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-09-10', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-12-24', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-08-07', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-10-21', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-07-14', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-13', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-06', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-07-01', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-11', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-10-30', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-26', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-10', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-09-10', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-12-24', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-08-07', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-22', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-04-10', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-07-20', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-04-07', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-10', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-07-20', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-07', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-30', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-07-03', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-11-01', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-07-03', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-11-01', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-04', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-01-02', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-09-04', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-02', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-09-04', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-06-03', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-02-22', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-04-11', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-03-27', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-06-01', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-03-13', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-05-21', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-08-25', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-07-20', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-10-31', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-01-28', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-04-08', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-02-04', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-07-20', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-02-22', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-11', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-03-27', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-01', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-03-13', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-21', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-25', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-07-20', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-10-31', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-28', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-08', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-02-04', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-07-20', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-27', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-05-27', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-05-29', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-27', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-29', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-06-06', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-04-12', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-07-10', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-12', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-07-10', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-11', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-04', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-12-20', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-04-05', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-04-09', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-05-04', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-04-30', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-07-23', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-01-01', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-12-03', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-11-26', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-07-07', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-07-07', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-12-20', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-05', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-09', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-04', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-30', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-23', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-01', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-12-03', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-11-26', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-07-07', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-07-07', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-03-04', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-25', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-09-16', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-11-25', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-08-16', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-10-17', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-05-08', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-10-22', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-09-16', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-11-25', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-16', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-10-17', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-08', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-10-22', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-03-17', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-10-27', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-12-05', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-07-20', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-08-04', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-04-03', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-01-24', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-12-17', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-04-27', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-10-22', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-10-14', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-05-23', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-12-03', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-07-21', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-12-30', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-05-12', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-10-27', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-12-05', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-07-20', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-08-04', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-03', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-24', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-12-17', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-27', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-10-22', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-10-14', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-23', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-12-03', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-21', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-12-30', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-05-12', 'Kalibrasi', 1);
 
 
 
@@ -3707,106 +3813,106 @@ INSERT INTO Barang_Konsumsi (nama_barang, jumlah, satuan, id_akun) VALUES ('Dete
 INSERT INTO Barang_Konsumsi (nama_barang, jumlah, satuan, id_akun) VALUES ('Sabun', 24, 'pcs', 1);
 
 -- Insert Maintenance_Alat_Laundry
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-09-29', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-01-11', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-08-25', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-02-04', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-09-29', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-11', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-25', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-02-04', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-06', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-12-28', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-02-15', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-12-28', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-15', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-03-27', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-02-01', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-11-29', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-08-08', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-10-16', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-03-23', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-08-14', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-11-17', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-04-29', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-11-29', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-08-08', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-10-16', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-23', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-14', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-11-17', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-29', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-04', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-07-25', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-07-31', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-05-14', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-25', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-07-31', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-05-14', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-10', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-06-06', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-06-06', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-05-17', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-06-05', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-06-05', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-21', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-01-07', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-11-02', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-01-21', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-07-10', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-11-27', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-07', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-11-02', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-21', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-07-10', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-11-27', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-03-21', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-10-02', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-04-21', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-08-05', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-08-19', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-11-23', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-06-18', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-03-08', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-09-12', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-11-28', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-04-27', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-05-03', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-03-15', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-01-13', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-10-02', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-21', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-05', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-08-19', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-11-23', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-06-18', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-08', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-09-12', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-11-28', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-27', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-05-03', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-15', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-13', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-01', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-09-07', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-01-09', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-11-02', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-07-09', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-01-24', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-09-07', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-09', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-11-02', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-09', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-24', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-03', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-09-02', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-12-03', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-12-14', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-05-25', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-05-15', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-02-14', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-02-05', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-03-14', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-10-15', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-09-02', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-12-03', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-12-14', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-25', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-15', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-14', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-02-05', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-14', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-10-15', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-07', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-01-30', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-12-04', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-04-13', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-08-20', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-30', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-12-04', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-13', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-08-20', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-01', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-08-09', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-05-24', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-05-28', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-09', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-24', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-05-28', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-29', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-03-12', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-02-28', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-06-24', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-08-13', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-01-26', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-01-03', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-06-29', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-08-28', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-03-16', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-09-16', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-08-23', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-12-11', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-02-10', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-07-08', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-01-09', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-11-30', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-05-19', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-07-09', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-11-12', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-06-23', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-10-18', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-12', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-28', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-06-24', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-08-13', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-26', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-03', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-29', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-08-28', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-03-16', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-09-16', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-23', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-12-11', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-10', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-08', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-09', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-11-30', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-19', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-09', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-11-12', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-06-23', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-10-18', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-24', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-26', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-08-18', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-08-18', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-06-19', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-03-27', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-08-14', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-08-06', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-09-21', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-11-30', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-03-27', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-14', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-08-06', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-09-21', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-11-30', 'Perawatan rutin', 1);
 
 
             --== 301-400 ==--
@@ -4220,106 +4326,106 @@ INSERT INTO Barang_Konsumsi (nama_barang, jumlah, satuan, id_akun) VALUES ('Dete
 INSERT INTO Barang_Konsumsi (nama_barang, jumlah, satuan, id_akun) VALUES ('Sabun', 24, 'pcs', 1);
 
 -- Insert Maintenance_Alat_Laundry
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-09-29', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-01-11', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-08-25', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-02-04', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-09-29', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-11', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-25', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-02-04', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-06', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-12-28', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-02-15', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-12-28', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-15', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-03-27', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-02-01', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-11-29', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-08-08', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-10-16', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-03-23', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-08-14', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-11-17', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-04-29', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-11-29', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-08-08', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-10-16', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-23', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-14', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-11-17', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-29', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-04', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-07-25', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-07-31', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-05-14', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-25', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-07-31', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-05-14', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-10', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-06-06', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-06-06', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-05-17', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-06-05', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-06-05', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-21', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-01-07', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-11-02', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-01-21', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-07-10', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-11-27', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-07', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-11-02', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-21', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-07-10', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-11-27', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-03-21', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-10-02', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-04-21', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-08-05', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-08-19', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-11-23', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-06-18', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-03-08', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-09-12', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-11-28', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-04-27', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-05-03', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-03-15', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-01-13', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-10-02', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-21', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-05', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-08-19', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-11-23', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-06-18', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-08', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-09-12', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-11-28', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-27', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-05-03', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-15', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-13', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-01', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-09-07', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-01-09', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-11-02', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-07-09', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-01-24', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-09-07', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-09', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-11-02', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-09', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-24', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-03', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-09-02', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-12-03', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-12-14', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-05-25', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-05-15', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-02-14', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-02-05', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-03-14', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-10-15', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-09-02', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-12-03', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-12-14', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-25', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-15', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-14', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-02-05', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-14', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-10-15', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-07', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-01-30', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-12-04', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-04-13', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-08-20', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-30', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-12-04', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-13', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-08-20', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-01', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-08-09', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-05-24', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-05-28', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-09', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-24', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-05-28', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-29', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-03-12', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-02-28', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-06-24', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-08-13', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-01-26', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-01-03', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-06-29', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-08-28', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-03-16', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-09-16', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-08-23', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-12-11', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-02-10', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-07-08', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-01-09', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-11-30', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-05-19', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-07-09', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-11-12', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-06-23', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-10-18', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-12', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-28', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-06-24', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-08-13', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-26', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-03', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-29', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-08-28', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-03-16', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-09-16', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-23', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-12-11', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-10', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-08', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-09', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-11-30', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-19', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-09', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-11-12', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-06-23', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-10-18', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-24', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-26', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-08-18', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-08-18', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-06-19', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-03-27', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-08-14', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-08-06', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-09-21', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-11-30', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-03-27', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-14', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-08-06', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-09-21', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-11-30', 'Perawatan rutin', 1);
 
 
             --== 501-600 ==--
@@ -4733,106 +4839,106 @@ INSERT INTO Barang_Konsumsi (nama_barang, jumlah, satuan, id_akun) VALUES ('Pemu
 INSERT INTO Barang_Konsumsi (nama_barang, jumlah, satuan, id_akun) VALUES ('Pemutih', 74, 'kg', 1);
 
 -- Insert Maintenance_Alat_Laundry
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-07-15', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-06-22', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-15', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-06-22', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-13', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-01-26', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-26', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-14', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-05-31', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-05-08', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-09-02', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-01-06', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-03-13', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-11-07', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-03-11', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-09-02', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-06', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-03-13', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-11-07', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-11', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-05-29', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-05-15', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-15', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-06-03', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-02-24', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-21', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-09', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-07-24', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-07-24', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-12', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-05-30', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-07-24', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-09-12', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-06-13', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-02-16', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-05-30', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-07-24', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-09-12', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-13', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-16', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-11', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-08-19', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-11-30', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-06-07', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-06-24', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-08-18', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-01-28', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-08-24', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-11-19', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-19', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-11-30', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-06-07', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-24', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-18', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-28', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-24', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-11-19', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-22', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-19', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-06-23', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-03-05', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-07-06', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-01-13', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-07-06', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-13', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-13', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-03-04', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-03-22', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-02-20', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-03-22', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-20', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-03', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-12-02', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-04-20', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-04-16', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-01-20', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-12-02', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-20', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-16', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-20', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-23', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-07-22', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-08-06', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-02-24', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-04-12', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-07-22', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-08-06', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-24', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-12', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-20', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-10-15', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-06-14', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-09-09', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-10-15', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-06-14', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-09-09', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-09', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-04-08', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-08', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-03', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-03-12', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-11-27', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-01-18', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-02-14', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-05-08', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-01-13', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-11-04', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-08-19', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-08-04', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-07-28', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-02-12', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-10-18', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-05-22', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-05-19', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-12', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-11-27', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-18', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-14', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-08', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-13', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-11-04', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-19', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-04', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-07-28', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-12', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-10-18', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-22', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-05-19', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-11', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-11-05', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-11-05', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-06', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-02-05', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-01-25', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-10-01', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-04-02', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-05', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-25', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-10-01', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-02', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-15', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-21', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-05-03', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-02-09', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-07-26', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-04-08', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-10-12', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-04-04', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-09-27', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-05-29', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-02-25', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-09-26', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-02-08', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-06-14', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-05-03', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-02-09', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-26', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-08', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-10-12', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-04', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-09-27', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-05-29', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-25', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-09-26', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-08', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-06-14', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-06-29', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-10', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-07-13', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-10-06', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-07-13', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-10-06', 'Pembersihan mendalam', 1);
 
 
                 --== 501-600 ==--
@@ -5246,106 +5352,106 @@ INSERT INTO Barang_Konsumsi (nama_barang, jumlah, satuan, id_akun) VALUES ('Pemu
 INSERT INTO Barang_Konsumsi (nama_barang, jumlah, satuan, id_akun) VALUES ('Sabun', 95, 'ltr', 1);
 
 -- Insert Maintenance_Alat_Laundry
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-09-16', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-11-29', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-09-02', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-12-02', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-10-16', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-08-21', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-09-23', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-11-19', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-01-07', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-09-30', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-08-30', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-02-03', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-04-27', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-09-16', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-11-29', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-09-02', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-12-02', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-10-16', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-08-21', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-09-23', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-11-19', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-07', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-09-30', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-08-30', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-02-03', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-27', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-26', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-10-31', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-01-31', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-01-19', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-06-08', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-11-01', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-07-21', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-09-22', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-09-03', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-09-05', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-12-27', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-10-31', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-31', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-19', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-06-08', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-11-01', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-07-21', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-09-22', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-09-03', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-09-05', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-12-27', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-06-28', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-04-23', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-07-28', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-05-22', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-04-23', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-03-13', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-23', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-07-28', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-22', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-23', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-13', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-05-16', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-04-09', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-11-16', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-09-08', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-08-09', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-05-27', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-06-03', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-08-09', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-01-23', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-08-17', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-09', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-11-16', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-09-08', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-09', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-27', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-06-03', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-08-09', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-23', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-17', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-21', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-07-11', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-11-12', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-08-02', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-04-18', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-10-07', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-08-17', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-01-01', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-04-11', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-05-05', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-11-01', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-07-26', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-12-27', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-12-18', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-07-11', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-11-12', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-08-02', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-18', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-10-07', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-08-17', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-01', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-11', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-05-05', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-11-01', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-26', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-12-27', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-12-18', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-06-13', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-01-27', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-02-16', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-08-25', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-08-27', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-02-18', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-06-17', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-07-09', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-27', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-16', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-25', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-27', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-02-18', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-06-17', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-07-09', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-30', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-03-26', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-04-23', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-26', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-23', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-10', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-12-23', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-04-25', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-12-23', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-25', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-31', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-09-06', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-08-15', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-11-11', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-09-06', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-08-15', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-11-11', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-31', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-08-28', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-04-14', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-09-05', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-28', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-14', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-09-05', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-02-28', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-18', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-07-03', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-03-08', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-10-01', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-12-25', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-07-13', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-02-06', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-07-13', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-10-13', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-05-05', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-03-02', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-08-03', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-11-22', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-08-16', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-08', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-10-01', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-12-25', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-07-13', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-02-06', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-07-13', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-10-13', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-05', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-02', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-08-03', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-11-22', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-08-16', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-07', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-25', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-06-13', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-08-25', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-01-25', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-06-25', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-09-14', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-06-13', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-08-25', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-25', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-06-25', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-09-14', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-06-24', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-11-07', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-11-07', 'Penggantian suku cadang', 1);
 
 
                 --== 601-700 ==--
@@ -5759,106 +5865,106 @@ INSERT INTO Barang_Konsumsi (nama_barang, jumlah, satuan, id_akun) VALUES ('Disi
 INSERT INTO Barang_Konsumsi (nama_barang, jumlah, satuan, id_akun) VALUES ('Detergen', 15, 'pcs', 1);
 
 -- Insert Maintenance_Alat_Laundry
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-06-18', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-08-24', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-03-13', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-02-04', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-11-02', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-07-08', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-06-18', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-08-24', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-03-13', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-02-04', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-11-02', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-08', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-21', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-07-01', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-05-29', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-04-01', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-07-01', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-05-29', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-01', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-04', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-08-27', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-08-06', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-08-21', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-02-17', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-11-23', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-27', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-06', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-08-21', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-17', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-11-23', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-13', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-05-25', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-01-26', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-10-19', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-01-06', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-01-19', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-01-27', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-26', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-10-19', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-06', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-19', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-27', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-25', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-04-16', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-07-05', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-04-07', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-16', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-05', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-07', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-07-02', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-02-08', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-02-08', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-08', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-02-01', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-01-18', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-01', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-18', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-06-18', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-01-15', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-04-23', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-01-10', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-07-17', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-05-11', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-09-02', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-12-08', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-15', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-23', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-10', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-07-17', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-11', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-09-02', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-12-08', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-05-07', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-08-24', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-04-10', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-02-08', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-01-30', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-03-13', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-12-31', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-08-06', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-01-23', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-08-06', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-08-04', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-09-27', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-11-24', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-05-15', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-07-26', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-08-03', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-12-23', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-12-16', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-24', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-10', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-08', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-30', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-13', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-12-31', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-08-06', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-23', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-06', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-04', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-09-27', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-11-24', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-15', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-07-26', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-03', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-12-23', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-12-16', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-15', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-22', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-09-11', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-06-12', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-10-08', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-01-29', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-11-12', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-05-29', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-03-30', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-04-29', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-07-10', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-11-15', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-09-11', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-12', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-10-08', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-29', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-11-12', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-29', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-30', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-29', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-10', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-11-15', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-09', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-09-06', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-04-30', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-04-20', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-06-21', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-04-16', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-04-19', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-05-11', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-12-06', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-09-06', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-30', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-20', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-06-21', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-16', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-19', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-11', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-12-06', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-30', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-07-23', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-08-26', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-01-05', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-08-20', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-10-12', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-07-23', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-26', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-05', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-08-20', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-10-12', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-06-25', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-12', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-11-27', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-11-27', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-25', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-07-16', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-01-20', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-04-30', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-07-20', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-07-16', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-20', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-30', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-07-20', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-03-31', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-06-04', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-04-02', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-01-24', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-07-17', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-09-23', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-03-16', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-04', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-02', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-24', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-17', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-09-23', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-03-16', 'Penggantian suku cadang', 1);
 
                 --== 701-800 ==--
 
@@ -6271,104 +6377,104 @@ INSERT INTO Barang_Konsumsi (nama_barang, jumlah, satuan, id_akun) VALUES ('Dete
 INSERT INTO Barang_Konsumsi (nama_barang, jumlah, satuan, id_akun) VALUES ('Pewangi', 58, 'kg', 1);
 
 -- Insert Maintenance_Alat_Laundry
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-11-17', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-11-17', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-07-04', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-05', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-02-10', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-02-10', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-03-29', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-10-02', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-01-27', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-10-02', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-27', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-02', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-04-20', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-20', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-30', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-06-24', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-10-28', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-24', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-10-28', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-02-01', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-07', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-08-20', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-08-20', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-29', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-05-26', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-02-05', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-05-02', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-09-24', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-08-31', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-08-27', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-07-17', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-09-28', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-26', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-05', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-02', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-09-24', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-31', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-27', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-07-17', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-09-28', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-03', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-03-17', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-17', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-03-17', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-09-17', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-09-17', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-18', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-08-03', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-02-21', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-02-05', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-10-27', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-03', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-21', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-05', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-10-27', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-19', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-04-27', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-09-24', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-27', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-09-24', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-06', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-06-14', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-01-04', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-06-14', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-04', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-05-11', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-06-20', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-12-12', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-01-14', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-12-06', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-03-15', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-11-12', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-06-13', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-04-25', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-07-02', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-20', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-12-12', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-14', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-12-06', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-03-15', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-11-12', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-06-13', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-25', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-02', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-04', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-10-10', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-11-19', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-04-29', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-11-15', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-12-28', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-12-06', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-06-21', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-11-29', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-03-30', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-10-10', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-11-19', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-29', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-11-15', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-12-28', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-12-06', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-06-21', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-11-29', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-03-30', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-24', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-02-03', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-03', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-12', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-12-05', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-12-03', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-10-13', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-03-16', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-09-15', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-12-05', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-12-03', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-10-13', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-03-16', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-09-15', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-06', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-03-11', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-02-23', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-11', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-23', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-06-18', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-02-13', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-06-06', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-02-13', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-06', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-05-21', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-17', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-06-04', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-12-01', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-01-30', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-06-12', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-06-04', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-12-01', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-30', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-12', 'Pembersihan mendalam', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-06-10', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-05-23', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-01-22', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-06-25', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-23', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-22', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-06-25', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-16', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-12-04', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-08-05', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-05-14', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-11-24', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-10-25', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-07-19', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-12-04', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-08-05', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-14', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-11-24', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-10-25', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-07-19', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-24', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-01-11', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-09-10', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-03-06', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-10-26', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-11', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-09-10', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-06', 'Pembersihan mendalam', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-10-26', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-05', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-01-12', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-01-15', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-12', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-15', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-28', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-12', 'Perawatan rutin', 1);
 
@@ -6784,106 +6890,106 @@ INSERT INTO Barang_Konsumsi (nama_barang, jumlah, satuan, id_akun) VALUES ('Pemu
 INSERT INTO Barang_Konsumsi (nama_barang, jumlah, satuan, id_akun) VALUES ('Sabun', 17, 'ltr', 1);
 
 -- Insert Maintenance_Alat_Laundry
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-09-23', 'Penggantian suku cadang', 1);   
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-08-10', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-09-23', 'Penggantian suku cadang', 1);   
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-10', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-13', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-05-21', 'Perawatan rutin', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-08-27', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-03-21', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-11-24', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-09-12', 'Pembersihan mendalam', 1);  
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-11-24', 'Penggantian suku cadang', 1);   
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-02-21', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-08-30', 'Penggantian suku cadang', 1);    
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-04-14', 'Penggantian suku cadang', 1);    
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-05-21', 'Perawatan rutin', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-27', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-03-21', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-11-24', 'Pembersihan mendalam', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-09-12', 'Pembersihan mendalam', 1);  
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-11-24', 'Penggantian suku cadang', 1);   
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-02-21', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-30', 'Penggantian suku cadang', 1);    
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-14', 'Penggantian suku cadang', 1);    
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-07-02', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-06-26', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-09-03', 'Penggantian suku cadang', 1);    
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-06-26', 'Pembersihan mendalam', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-09-03', 'Penggantian suku cadang', 1);    
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-02-28', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-03-01', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-10-16', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-08-17', 'Pembersihan mendalam', 1);      
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-04-29', 'Penggantian suku cadang', 1);   
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-03-10', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-10-13', 'Perawatan rutin', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-08-20', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-06-09', 'Pembersihan mendalam', 1);  
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-10-16', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-17', 'Pembersihan mendalam', 1);      
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-29', 'Penggantian suku cadang', 1);   
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-03-10', 'Pembersihan mendalam', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-10-13', 'Perawatan rutin', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-20', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-06-09', 'Pembersihan mendalam', 1);  
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-28', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-10-23', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-06-14', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-10-25', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-10-23', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-06-14', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-10-25', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-02-19', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-02-25', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-06-19', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-04-27', 'Pembersihan mendalam', 1);  
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-03-11', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-04-26', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-05-10', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-07-31', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-19', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-27', 'Pembersihan mendalam', 1);  
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-11', 'Pembersihan mendalam', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-26', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-05-10', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-31', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-24', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-06-05', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-08-20', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-03-04', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-06-04', 'Penggantian suku cadang', 1);    
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-05', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-08-20', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-04', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-06-04', 'Penggantian suku cadang', 1);    
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-08', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-07-02', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-01-12', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-04-30', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-12-26', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-11-12', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-08-02', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-01-18', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-03-10', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-07-02', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-12', 'Pembersihan mendalam', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-30', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-12-26', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-11-12', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-02', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-18', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-03-10', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-05-07', 'Pembersihan mendalam', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-09-03', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-12-28', 'Penggantian suku cadang', 1);    
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-02-26', 'Penggantian suku cadang', 1);   
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-05-07', 'Pembersihan mendalam', 1);      
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-12-01', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-04-12', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-11-15', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-11-07', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-09-26', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-07-21', 'Perawatan rutin', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-05-19', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-08-07', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-04-04', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-01-07', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-03-16', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-09-03', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-12-28', 'Penggantian suku cadang', 1);    
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-02-26', 'Penggantian suku cadang', 1);   
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-07', 'Pembersihan mendalam', 1);      
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-12-01', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-12', 'Pembersihan mendalam', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-11-15', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-11-07', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-09-26', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-07-21', 'Perawatan rutin', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-05-19', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-08-07', 'Pembersihan mendalam', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-04', 'Pembersihan mendalam', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-07', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-16', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-06-17', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-29', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-10-28', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-04-12', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-11-04', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-01-06', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-07-31', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-04-04', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-12-16', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-04-21', 'Pembersihan mendalam', 1);      
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-04-28', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-09-19', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-04-22', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-11-16', 'Pembersihan mendalam', 1);  
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-10-28', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-12', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-11-04', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-06', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-07-31', 'Pembersihan mendalam', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-04', 'Pembersihan mendalam', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-12-16', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-04-21', 'Pembersihan mendalam', 1);      
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-28', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-09-19', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-22', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-11-16', 'Pembersihan mendalam', 1);  
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-24', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-09-28', 'Penggantian suku cadang', 1);   
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-05-21', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-02-07', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-04-27', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-06-08', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-09-28', 'Penggantian suku cadang', 1);   
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-05-21', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-02-07', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-27', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-06-08', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-03-12', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-05-01', 'Perawatan rutin', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-01-17', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-10-23', 'Penggantian suku cadang', 1);    
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-08-27', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-11-01', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-04-23', 'Perawatan rutin', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-10-25', 'Penggantian suku cadang', 1);    
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-05-01', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-08-03', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-02-28', 'Perawatan rutin', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-05-01', 'Perawatan rutin', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-17', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-10-23', 'Penggantian suku cadang', 1);    
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-08-27', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-11-01', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-23', 'Perawatan rutin', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-10-25', 'Penggantian suku cadang', 1);    
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-05-01', 'Pembersihan mendalam', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-08-03', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-28', 'Perawatan rutin', 1);       
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-02-13', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-01-18', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-11-14', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-18', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-11-14', 'Perawatan rutin', 1);
 
 
                 --== 901-1000 ==--
@@ -7299,101 +7405,101 @@ INSERT INTO Barang_Konsumsi (nama_barang, jumlah, satuan, id_akun) VALUES ('Disi
 -- Insert Maintenance_Alat_Laundry
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-27', 'Penggantian suku cadang', 1);    
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-25', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-06-25', 'Pembersihan mendalam', 1);  
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-04-25', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-06-25', 'Pembersihan mendalam', 1);  
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-25', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-06-29', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-08-10', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-01-01', 'Penggantian suku cadang', 1);    
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-05-21', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-08-13', 'Pembersihan mendalam', 1);  
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-01-21', 'Pembersihan mendalam', 1);  
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-08-10', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-01', 'Penggantian suku cadang', 1);    
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-21', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-08-13', 'Pembersihan mendalam', 1);  
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-21', 'Pembersihan mendalam', 1);  
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-08', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-08-14', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-11-18', 'Pembersihan mendalam', 1);  
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-08-16', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-07-16', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-12-14', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-08-12', 'Penggantian suku cadang', 1);    
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-01-16', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-05-17', 'Penggantian suku cadang', 1);   
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-12-21', 'Penggantian suku cadang', 1);    
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-11-16', 'Pembersihan mendalam', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-08-14', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-11-18', 'Pembersihan mendalam', 1);  
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-16', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-07-16', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-12-14', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-12', 'Penggantian suku cadang', 1);    
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-16', 'Pembersihan mendalam', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-17', 'Penggantian suku cadang', 1);   
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-12-21', 'Penggantian suku cadang', 1);    
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-11-16', 'Pembersihan mendalam', 1);       
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-02-22', 'Penggantian suku cadang', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-21', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-06-20', 'Penggantian suku cadang', 1);    
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-05-09', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-12-03', 'Perawatan rutin', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-07-29', 'Pembersihan mendalam', 1);  
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-04-04', 'Perawatan rutin', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-01-21', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-06-26', 'Pembersihan mendalam', 1);  
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-06-20', 'Penggantian suku cadang', 1);    
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-05-09', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-12-03', 'Perawatan rutin', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-07-29', 'Pembersihan mendalam', 1);  
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-04', 'Perawatan rutin', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-21', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-06-26', 'Pembersihan mendalam', 1);  
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-06-25', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-11-24', 'Penggantian suku cadang', 1);    
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-12-27', 'Penggantian suku cadang', 1);   
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-08-02', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-11-22', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-03-18', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-04-18', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-09-05', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-09-21', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-01-09', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-03-18', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-06-04', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-06-11', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-06-15', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-03-16', 'Pembersihan mendalam', 1);  
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-11-24', 'Penggantian suku cadang', 1);    
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-12-27', 'Penggantian suku cadang', 1);   
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-08-02', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-11-22', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-18', 'Pembersihan mendalam', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-18', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-09-05', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-09-21', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-09', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-18', 'Pembersihan mendalam', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-06-04', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-06-11', 'Pembersihan mendalam', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-15', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-16', 'Pembersihan mendalam', 1);  
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-30', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-07-03', 'Pembersihan mendalam', 1);      
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-07-03', 'Pembersihan mendalam', 1);      
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-03-26', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-01-29', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-05-30', 'Pembersihan mendalam', 1);  
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-01-16', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-29', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-05-30', 'Pembersihan mendalam', 1);  
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-16', 'Perawatan rutin', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-07-02', 'Pembersihan mendalam', 1);  
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-09', 'Penggantian suku cadang', 1);    
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-12-11', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-01-29', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-12-11', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-29', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-12', 'Penggantian suku cadang', 1);    
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-03-05', 'Penggantian suku cadang', 1);    
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-05', 'Penggantian suku cadang', 1);    
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-01-05', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-02-19', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-02-19', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-11', 'Pembersihan mendalam', 1);  
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-12-23', 'Penggantian suku cadang', 1);   
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-10-04', 'Pembersihan mendalam', 1);      
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-12-23', 'Penggantian suku cadang', 1);   
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-10-04', 'Pembersihan mendalam', 1);      
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-01-01', 'Penggantian suku cadang', 1);   
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-01-09', 'Perawatan rutin', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-08-15', 'Pembersihan mendalam', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-01-09', 'Perawatan rutin', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-08-15', 'Pembersihan mendalam', 1);       
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-06-18', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-10-16', 'Penggantian suku cadang', 1);    
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-03-06', 'Penggantian suku cadang', 1);    
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-04-11', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-07-12', 'Penggantian suku cadang', 1);    
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-02-25', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-09-18', 'Penggantian suku cadang', 1);   
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-12-06', 'Pembersihan mendalam', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-10-16', 'Penggantian suku cadang', 1);    
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-03-06', 'Penggantian suku cadang', 1);    
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-04-11', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-07-12', 'Penggantian suku cadang', 1);    
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-02-25', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-09-18', 'Penggantian suku cadang', 1);   
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-12-06', 'Pembersihan mendalam', 1);       
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-02-26', 'Penggantian suku cadang', 1);    
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-07-31', 'Penggantian suku cadang', 1);    
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-08-22', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-06-10', 'Penggantian suku cadang', 1);   
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-02-21', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2023-03-30', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-12-23', 'Penggantian suku cadang', 1);    
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-08-31', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-12-12', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-03-06', 'Penggantian suku cadang', 1);    
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-04-29', 'Pembersihan mendalam', 1);  
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-05-16', 'Penggantian suku cadang', 1);    
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-07-31', 'Penggantian suku cadang', 1);    
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-08-22', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-10', 'Penggantian suku cadang', 1);   
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-02-21', 'Pembersihan mendalam', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-03-30', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-12-23', 'Penggantian suku cadang', 1);    
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-08-31', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-12-12', 'Pembersihan mendalam', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-03-06', 'Penggantian suku cadang', 1);    
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-29', 'Pembersihan mendalam', 1);  
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-05-16', 'Penggantian suku cadang', 1);    
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-03-13', 'Perawatan rutin', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2023-06-03', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-07-19', 'Perawatan rutin', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-06-03', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-07-19', 'Perawatan rutin', 1);       
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-03-20', 'Kalibrasi', 1);
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-01-11', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-10-05', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2024-10-06', 'Perawatan rutin', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-10-05', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-10-06', 'Perawatan rutin', 1);       
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-04-13', 'Penggantian suku cadang', 1);    
 INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-22', 'Perawatan rutin', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2024-11-16', 'Perawatan rutin', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-05-14', 'Pembersihan mendalam', 1);  
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2023-04-25', 'Penggantian suku cadang', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2023-03-04', 'Kalibrasi', 1);
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2024-09-25', 'Pembersihan mendalam', 1);       
-INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2024-06-06', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Press', '2025-11-16', 'Perawatan rutin', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-05-14', 'Pembersihan mendalam', 1);  
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Mesin Cuci', '2025-04-25', 'Penggantian suku cadang', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-03-04', 'Kalibrasi', 1);
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Dryer', '2025-09-25', 'Pembersihan mendalam', 1);       
+INSERT INTO Maintenance_Alat_Laundry (nama_alat, tanggal_maintenance, deskripsi, id_akun) VALUES ('Vacuum', '2025-06-06', 'Perawatan rutin', 1);
