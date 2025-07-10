@@ -7,13 +7,16 @@ namespace ManajemenLaundrySepatu
 {
     public static class ActivityLogger
     {
-        public static void Log(string action, string message)
+        public static void Log(string action, string message, string overrideUsername = null)
         {
-            string username = Session.GetUsernameById(Session.LoggedInUserId);
-            string log = $"[{username}] - [{DateTime.Now:G}] {action}: {message}{Environment.NewLine}";
+            string username = overrideUsername ?? Session.GetUsernameById(Session.LoggedInUserId);
+            if (string.IsNullOrEmpty(username))
+                username = "UnknownUser";
 
+            string log = $"[{username}] - [{DateTime.Now:G}] {action}: {message}{Environment.NewLine}";
             string logPath = PathHelper.GetLogFilePath();
             File.AppendAllText(logPath, log, Encoding.UTF8);
         }
+
     }
 }

@@ -165,6 +165,7 @@ namespace ManajemenLaundrySepatu
 
         private async void btnBackup_Click(object sender, EventArgs e)
         {
+            string currentUser = Session.GetUsernameById(Session.LoggedInUserId);
             using (var save = new SaveFileDialog())
             {
                 save.InitialDirectory = defaultBackupFolder;
@@ -178,7 +179,7 @@ namespace ManajemenLaundrySepatu
                 pbBR.Visible = true;
                 try
                 {
-                    await Task.Run(() => BackupDatabase(save.FileName));
+                    await Task.Run(() => BackupDatabase(save.FileName, currentUser));
                     Properties.Settings.Default.LastBackupTime = DateTime.Now;
                     Properties.Settings.Default.Save();
                     LoadLastBackupTime();
@@ -195,7 +196,7 @@ namespace ManajemenLaundrySepatu
             }
         }
 
-        private void BackupDatabase(string backupPath)
+        private void BackupDatabase(string backupPath, string performedBy)
         {
             using (var conn = new SqlConnection(connectionString))
             using (var cmd = new SqlCommand(backupProcedure, conn))
@@ -205,11 +206,12 @@ namespace ManajemenLaundrySepatu
                 conn.Open();
                 cmd.ExecuteNonQuery();
             }
-            ActivityLogger.Log("Backup Database", $"Backup file disimpan ke: {backupPath}");
+            ActivityLogger.Log("Backup Database", $"Backup file disimpan ke: {backupPath}", performedBy);
         }
 
         private async void btnRestore_Click(object sender, EventArgs e)
         {
+            string currentUser = Session.GetUsernameById(Session.LoggedInUserId);
             using (var open = new OpenFileDialog())
             {
                 open.Filter = "Backup File (*.bak)|*.bak";
@@ -228,7 +230,7 @@ namespace ManajemenLaundrySepatu
                 pbBR.Visible = true;
                 try
                 {
-                    await Task.Run(() => RestoreDatabase(open.FileName));
+                    await Task.Run(() => RestoreDatabase(open.FileName, currentUser));
                     DarkModeMessageBox.Show("Restore berhasil! Aplikasi akan restart.", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     Application.Restart();
                 }
@@ -243,7 +245,7 @@ namespace ManajemenLaundrySepatu
             }
         }
 
-        private void RestoreDatabase(string backupPath)
+        private void RestoreDatabase(string backupPath, string performedBy)
         {
             using (var conn = new SqlConnection(masterConnection))
             using (var cmd = new SqlCommand(restoreProcedure, conn))
@@ -253,7 +255,7 @@ namespace ManajemenLaundrySepatu
                 conn.Open();
                 cmd.ExecuteNonQuery();
             }
-            ActivityLogger.Log("Restore Database", $"Database di-restore dari file: {backupPath}");
+            ActivityLogger.Log("Restore Database", $"Database di-restore dari file: {backupPath}", performedBy);
         }
 
         private bool IsValidBackup(string path)
